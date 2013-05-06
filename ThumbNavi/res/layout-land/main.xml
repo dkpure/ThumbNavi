@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:background="#000000"
-    tools:context=".ThmbNaiviMain" >
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    	xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" 
+        android:background="#000000" 
+        tools:context=".ThmbNaiviMain">
 
         <LinearLayout
             android:id="@+id/linearLayout1"
@@ -52,24 +47,17 @@
                 android:layout_marginLeft="15dp"
                 android:src="@drawable/sign_gas" />
         </LinearLayout>
-
+        
         <cn.seu.dkpure.DigitalClock
-            android:id="@+id/_DigitalClock"
+            android:id="@+id/main_DigitalClock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginTop="15dp" />
-        
-        <cn.seu.dkpure.GearInfo
-            android:id="@+id/_GearInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/_DigitalClock" />
 
         <cn.seu.dkpure.NotifBar
-            android:id="@+id/notifBar"
+            android:id="@+id/main_NotifBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -78,21 +66,19 @@
             android:layout_marginTop="5dp" />
 
         <cn.seu.dkpure.WeatherView
-            android:id="@+id/weatherView1"
+            android:id="@+id/main_WeatherView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/notifBar" />
+            android:layout_below="@+id/main_NotifBar" />
 
-        <cn.seu.dkpure.RoadInfoBar
-            android:id="@+id/roadInfoBar"
+        <cn.seu.dkpure.DkMapWidget
+            android:id="@+id/main_DkMapWidget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/_DigitalClock"
-            android:layout_marginLeft="14dp"
-            android:layout_marginTop="18dp"
-            android:layout_toRightOf="@+id/weatherView1" />
-
+            android:layout_below="@+id/main_DigitalClock"
+            android:layout_marginTop="4dp"
+            android:layout_toLeftOf="@+id/main_DigitalClock" >
+        </cn.seu.dkpure.DkMapWidget>
+        
     </RelativeLayout>
-    
-</LinearLayout>

@@ -78,7 +78,7 @@ public class GearInfo extends View implements Runnable{
 		unit_color = DEFAULT_UNIT_COLOR;
 		
 		buffer_rect = new Rect();
-		show_rect = new Rect();		
+		show_rect = new Rect();
 		anim_interpolator = new AccelerateDecelerateInterpolator();
 
 		renderImageBuffer();		
@@ -233,10 +233,7 @@ public class GearInfo extends View implements Runnable{
 	 * @return last animation has finished or not
 	 */
 	private boolean isInAnimation() {
-		if (anim_thread != null && anim_thread.isAlive())
-			return true;
-		else		
-			return false;
+		return (anim_thread != null && anim_thread.isAlive()) ? true : false;
 	}
 	
 	/**
@@ -260,7 +257,7 @@ public class GearInfo extends View implements Runnable{
 	 * @return suitable width of layout
 	 */
 	private int getSuitableWidth() {
-    	int ret = 10; // set minimal width 10
+    	int ret = 10; // set minimal width to 10
     	
     	if (show_buffer != null)
     		ret = show_buffer.getWidth();
@@ -273,7 +270,7 @@ public class GearInfo extends View implements Runnable{
 	 * @return suitable height of layout
 	 */
     private int getSuitableHeight() {
-    	int ret = 10; // set minimal height 10
+    	int ret = 10; // set minimal height to 10
     	
     	if (show_buffer != null)
     		ret = show_buffer.getHeight();

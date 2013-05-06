@@ -170,7 +170,7 @@ public class WeatherView extends View {
 		super.onDraw(canvas);
 		
 		int x = getPaddingLeft();
-		int y = getPaddingTop() - (int) text_paint.ascent() + (int) text_paint.descent() + weather_icon.getHeight();
+		int y = getPaddingTop() - (int) text_paint.ascent() /*+ (int) text_paint.descent()*/ + weather_icon.getHeight();
 		
 		if (null != weather_icon)
 			canvas.drawBitmap(weather_icon, getPaddingLeft(), getPaddingTop(), null);// draw weather icon bitmap

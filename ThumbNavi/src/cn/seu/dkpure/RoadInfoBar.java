@@ -1,6 +1,7 @@
 package cn.seu.dkpure;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,7 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Rect;
+//import android.graphics.Rect;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -24,8 +25,8 @@ import android.view.View;
  */
 public class RoadInfoBar extends View{
 	private int	n_expand_strip = 3;
-	private ArrayList<String> info_list;
-	private ArrayList<Bitmap>	dir_bitmap_list;
+	private List<String> info_list;
+	private List<Bitmap> dir_bitmap_list;
 	private	String	text_cur_info;
 	private	String	text_cur_distance;
 	
@@ -38,7 +39,7 @@ public class RoadInfoBar extends View{
 	private Paint	i_rect_paint;
 	private Paint	sep_line_paint;
 	private	Paint	progress_paint;
-	private	Bitmap	img_shadow;
+//	private	Bitmap	img_shadow = null;
 	
 	private int		screen_width = 854;
 	private int 	default_barW = screen_width * 9 / 20;
@@ -108,7 +109,8 @@ public class RoadInfoBar extends View{
 		medium_text_paint = new Paint();
 		medium_text_paint.setAntiAlias(true);
 		medium_text_paint.setTextSize(text_size_medium);
-		medium_text_paint.setColor(Color.BLACK);
+//		medium_text_paint.setColor(Color.BLACK);
+		medium_text_paint.setColor(Color.WHITE);
 		
 		i_rect_paint = new Paint();
 		i_rect_paint.setAntiAlias(true);
@@ -126,7 +128,7 @@ public class RoadInfoBar extends View{
 		progress_paint.setShader(shader);
 		progress_paint.setAlpha(150);
 		
-		img_shadow = BitmapFactory.decodeResource(getResources(), R.drawable.shadow0);
+//		img_shadow = BitmapFactory.decodeResource(getResources(), R.drawable.shadow0);
 	}
 	
 	/**
@@ -383,8 +385,8 @@ public class RoadInfoBar extends View{
 		int x = sign_image_width;
 		int y = getCenterAlignBaseline(H, large_text_paint);
 		
-		canvas.drawRect(0, 0, getWidth(), getHeight(), i_rect_paint);// draw background
-		canvas.drawRect(0, 0, getWidth(), H, i_rect_paint);// draw the first strip
+//		canvas.drawRect(0, 0, getWidth(), getHeight(), i_rect_paint);// draw background
+//		canvas.drawRect(0, 0, getWidth(), H, i_rect_paint);// draw the first strip
 		canvas.drawRect(0, 0, getWidth() - 200, H, progress_paint);// draw progress 
 		
 		// draw road direction indicator
@@ -404,13 +406,14 @@ public class RoadInfoBar extends View{
 				DISPLAY_MODE.IN_ANIMATION == disp_mode) {
 			int tmp_baseline2 = getCenterAlignBaseline(H, medium_text_paint);
 			
-			if (img_shadow != null) {
-				canvas.drawBitmap(
-						img_shadow, 
-						new Rect(0, 0, 1, img_shadow.getHeight()), 
-						new Rect(0, H, getWidth(), H + img_shadow.getHeight()), 
-						null);
-			}
+			// draw shadow
+//			if (img_shadow != null) {
+//				canvas.drawBitmap(
+//						img_shadow, 
+//						new Rect(0, 0, 1, img_shadow.getHeight()), 
+//						new Rect(0, H, getWidth(), H + img_shadow.getHeight()), 
+//						null);
+//			}
 			
 			for (int i = 1; i < n_expand_strip && i < info_list.size(); ++i) {
 				x = sign_image_width;

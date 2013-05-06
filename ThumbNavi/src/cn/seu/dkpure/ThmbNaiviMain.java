@@ -1,9 +1,10 @@
 package cn.seu.dkpure;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.util.Log;
+//import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -12,17 +13,21 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+/**
+ * Main activity to be launch
+ * @author dkpure
+ *
+ */
 public class ThmbNaiviMain extends Activity {
-	DigitalClock 	wg_clock;
-	WeatherView	 	wg_weather;
-	RoadInfoBar		wg_roadinfo;
-	GearInfo		wg_gearinfo;
+	private DkMapWidget 	wg_dkmap = null;
+	private LinearLayout 	wg_obdinfo = null;
 	
-	ImageView		wg_sign_seatbelt;
-	ImageView		wg_sign_fontlight;
-	ImageView		wg_sign_turnleft;
-	ImageView		wg_sign_gas;
+	private ImageView		wg_sign_seatbelt;
+	private ImageView		wg_sign_fontlight;
+	private ImageView		wg_sign_turnleft;
+	private ImageView		wg_sign_gas;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -33,52 +38,41 @@ public class ThmbNaiviMain extends Activity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
 		        					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().setFormat(PixelFormat.RGBA_8888);
 		
 		setContentView(R.layout.main);
-		
-		getWindow().setFormat(PixelFormat.RGBA_8888);
 		
 		emergeViews();
 		dashboardSignsAnimShow();
     }
     
+    private void startDrivingActivity() {
+    	Intent intent = new Intent(this, ThumbNaviDriving.class);
+		startActivity(intent);
+    }
+    
     private void emergeViews() {
-    	wg_clock = (DigitalClock) findViewById(R.id._DigitalClock);
-    	wg_weather = (WeatherView) findViewById(R.id.weatherView1);
-    	wg_roadinfo = (RoadInfoBar) findViewById(R.id.roadInfoBar);
-    	wg_gearinfo = (GearInfo) findViewById(R.id._GearInfo);
+//    	wg_clock = (DigitalClock) findViewById(R.id._DigitalClock);
+//    	wg_weather = (WeatherView) findViewById(R.id.weatherView1);
+    	wg_dkmap = (DkMapWidget) findViewById(R.id.main_DkMapWidget);
     	
-    	if (wg_gearinfo != null) {
-	    	wg_gearinfo.setOnClickListener(new OnClickListener () {
-	
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					
-					int g_index = (int)(Math.random() * 7);
-					GearInfo.GAER_ENUMS g = GearInfo.GAER_ENUMS.GEAR_N;
-					switch (g_index) {
-					case 0: g = GearInfo.GAER_ENUMS.GEAR_N; break;
-					case 1: g = GearInfo.GAER_ENUMS.GEAR_1; break;
-					case 2: g = GearInfo.GAER_ENUMS.GEAR_2; break;
-					case 3: g = GearInfo.GAER_ENUMS.GEAR_3; break;
-					case 4: g = GearInfo.GAER_ENUMS.GEAR_4; break;
-					case 5: g = GearInfo.GAER_ENUMS.GEAR_5; break;
-					case 6: g = GearInfo.GAER_ENUMS.GEAR_R; break;
-					}
-					wg_gearinfo.animateSwitchGear(g);
-				}
-	    		
-	    	});
-	    	wg_gearinfo.setGear(GearInfo.GAER_ENUMS.GEAR_R);
-	    	wg_gearinfo.animateSwitchGear(GearInfo.GAER_ENUMS.GEAR_N);
+    	wg_obdinfo = (LinearLayout) findViewById(R.id.linearLayout1);
+    	
+    	if (wg_obdinfo != null) {
+    		wg_obdinfo.bringToFront();
+
+    		wg_obdinfo.setOnClickListener(
+	    				new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								// TODO Auto-generated method stub
+								startDrivingActivity();
+							}
+	    					
+	    				}
+    				);
     	}
-    	
-    	
-    	wg_roadinfo.addNode(0, "龙蟠中路 - 300m");
-    	wg_roadinfo.addNode(7, "卡子门高架 - 2.6Km");
-    	wg_roadinfo.addNode(2, "机场连接线 - 90m");
-    	wg_roadinfo.addNode(6, "机场连接线 - 30m");
     	
     	wg_sign_seatbelt = (ImageView) findViewById(R.id.imgV_sign_seatbelt);
     	wg_sign_fontlight = (ImageView) findViewById(R.id.imgV_sign_frontlight);
@@ -104,6 +98,41 @@ public class ThmbNaiviMain extends Activity {
         	wg_sign_turnleft.startAnimation(a);
         if (wg_sign_gas != null)
         	wg_sign_gas.startAnimation(a);
+    }
+    
+    @Override
+    protected void onPause() {
+    	if (wg_dkmap != null)
+    		wg_dkmap.onPause();
+        super.onPause();
+    }
+    
+    @Override
+    protected void onResume() {
+    	if (wg_dkmap != null)
+    		wg_dkmap.onResume();
+        super.onResume();
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	if (wg_dkmap != null)
+    		wg_dkmap.onDestroy();
+        super.onDestroy();
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	super.onSaveInstanceState(outState);
+    	if (wg_dkmap != null)
+    		wg_dkmap.onSaveInstanceState(outState);
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    	super.onRestoreInstanceState(savedInstanceState);
+    	if (wg_dkmap != null)
+    		wg_dkmap.onRestoreInstanceState(savedInstanceState);
     }
     
 }

@@ -7,9 +7,22 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="8" />
 	
-    <uses-permission  android:name="android.permission.INTERNET" />
-    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>  
+	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission> 
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.CALL_PHONE"></uses-permission>
+	<permission android:name="android.permission.BAIDU_LOCATION_SERVICE"></permission>
+	<uses-permission android:name="android.permission.BAIDU_LOCATION_SERVICE"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+	<uses-permission android:name="android.permission.ACCES_MOCK_LOCATION"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_GPS" />
+	
     <application
+        android:name=".MainApplication"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -17,7 +30,9 @@
         <activity
             android:name=".ThmbNaiviMain"
             android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape" 
+            android:configChanges="orientation|keyboardHidden" > 
+            <!-- disable activity restart when landscape changed -->
             
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,6 +41,17 @@
             </intent-filter>
         </activity>
         
+        <activity
+            android:name=".ThumbNaviDriving" 
+            android:label="@string/activity_driving" 
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden" >
+		</activity>
+        
+        <service android:name="com.baidu.location.f" android:enabled="true"
+			android:process=":remote">
+		</service>
+		
     </application>
 
 </manifest>

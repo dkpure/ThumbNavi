@@ -18,10 +18,11 @@ public class DigitalClock extends View {
 	final static String Weekdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 	final static int SPLITX = 5;
 	
-	private	Paint	i_text_paint;
-	private	String	str_time = "15:52";
-	private	String	str_weekday = "Mon";
-	private	String	str_am = "PM";
+	private	Paint	time_paint;
+	private	Paint	week_paint;
+	private	String	str_time = "15:32";//null;
+	private	String	str_weekday = "Mon";//null;
+	private	String	str_am = "PM";//null;
 	private Time	i_time = null;
 	private Time	old_time = null;
 	private	int		i_text_size;
@@ -70,9 +71,15 @@ public class DigitalClock extends View {
 	private void initDigitalClock() {
 		updateTime();
 		i_text_size = 70;
-		i_text_paint = new Paint();
-		i_text_paint.setAntiAlias(true);
-		i_text_paint.setColor(Color.WHITE);
+		time_paint = new Paint();
+		time_paint.setAntiAlias(true);
+		time_paint.setColor(Color.WHITE);
+		time_paint.setTextSize(i_text_size);
+		
+		week_paint = new Paint();
+		week_paint.setAntiAlias(true);
+		week_paint.setColor(Color.WHITE);
+		week_paint.setTextSize(i_text_size / 2);
 		
 		final Handler tick_handler = new Handler();	
 		Runnable tick_runnable = new Runnable() {
@@ -93,10 +100,8 @@ public class DigitalClock extends View {
 	private int getRectWidth() {
     	int ret = SPLITX;
     	
-    	i_text_paint.setTextSize(i_text_size);
-    	ret += i_text_paint.measureText("00:00");
-    	i_text_paint.setTextSize(i_text_size / 2);
-    	ret += i_text_paint.measureText("Mon");
+    	ret += time_paint.measureText("00:00");
+    	ret += week_paint.measureText("Mon");
     	
     	return ret;
     }
@@ -104,8 +109,8 @@ public class DigitalClock extends View {
     private int getRectHeight() {
     	int ret = 0;
     	
-    	i_text_paint.setTextSize(i_text_size);
-    	ret = - ((int) i_text_paint.ascent()) + (int)i_text_paint.descent();
+    	time_paint.setTextSize(i_text_size);
+    	ret = - ((int) time_paint.ascent()) + (int)time_paint.descent();
     	return ret;
     }
     
@@ -159,14 +164,19 @@ public class DigitalClock extends View {
 	protected void onDraw (Canvas canvas) {
 		super.onDraw(canvas);
 		
-		i_text_paint.setTextSize(i_text_size);// text size for time
-		int x = getPaddingLeft() + (int) i_text_paint.measureText(str_time) + SPLITX;
-		int y = getPaddingTop();
-		int yy = y - ((int) i_text_paint.ascent());
-		canvas.drawText(str_time, getPaddingLeft(), yy, i_text_paint); // draw time
+		if (time_paint == null || week_paint == null || str_time == null)
+			return;
 		
-		i_text_paint.setTextSize(i_text_size / 2);// text size for weekday and am_pm
-		canvas.drawText(str_weekday, x, y - ((int) i_text_paint.ascent()), i_text_paint);// draw weekday
-		canvas.drawText(str_am, x, yy, i_text_paint);// draw am or pm
+		int x = (int) time_paint.measureText(str_time) + SPLITX;
+		int y = getPaddingTop();
+		int yy = y - ((int) time_paint.ascent());
+		int text_w = (int) week_paint.measureText(str_weekday) + x;
+		int x_offset = getWidth() - text_w;
+		
+		x += x_offset + getPaddingLeft();
+		canvas.drawText(str_time, getPaddingLeft() + x_offset, yy, time_paint); // draw time
+		canvas.drawText(str_weekday, x, y - ((int) week_paint.ascent()), week_paint); // draw weekday
+		canvas.drawText(str_am, x, yy, week_paint); // draw am or pm
+		
 	}
 }
