@@ -6,6 +6,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -128,6 +129,7 @@ public class GearInfo extends View implements Runnable{
 		int y = 0;
 		int base_line = getCenterAlignBaseline(margined_h, text_paint);
 		
+		/* FIXME: fille with blck color make this view not transparent. */
 		tmp_canvas.drawColor(Color.BLACK);
 		for (int i = 0; i < GEAR_ENUM_STRING.length(); ++i) {
 			String cur_gear = GEAR_ENUM_STRING.substring(i, i + 1);
@@ -354,6 +356,7 @@ public class GearInfo extends View implements Runnable{
 		int h = buffer_rect.height();
 		buffer_rect.top = anim_y0 + y_delta;
 		buffer_rect.bottom = buffer_rect.top + h;
+//		i_canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 		i_canvas.drawBitmap(image_buffer, buffer_rect, show_rect, null);
 	}
 	

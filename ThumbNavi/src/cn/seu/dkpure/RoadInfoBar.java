@@ -423,7 +423,7 @@ public class RoadInfoBar extends View{
     			String tmp_distance = getDistanceInfo(mixed_info);
     			
     			// draw separation line
-    			canvas.drawLine(0, (i + 1) * H, getWidth(), (i + 1) * H + 1, sep_line_paint);
+//    			canvas.drawLine(0, (i + 1) * H, getWidth(), (i + 1) * H + 1, sep_line_paint);
     			
     			if (dir_bitmap_list != null && i < dir_bitmap_list.size()) {
     				int y_delta = (H - dir_bitmap_list.get(i).getHeight()) / 2;

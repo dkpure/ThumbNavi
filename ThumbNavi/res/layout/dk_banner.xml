@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+
+    <TextView
+        android:id="@+id/dkbanner_text1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:maxLines="2"
+    	android:lines="2"
+        android:text="Meet Tim Cook at the airport\n at 10:00 AM" />
+
+    <TextView
+        android:id="@+id/dkbanner_text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:maxLines="2"
+    	android:lines="2"
+        android:text="Research department meeting\n at 2:00 PM" />
+
+</FrameLayout>

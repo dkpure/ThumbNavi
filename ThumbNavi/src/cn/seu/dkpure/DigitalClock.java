@@ -170,7 +170,10 @@ public class DigitalClock extends View {
 		int x = (int) time_paint.measureText(str_time) + SPLITX;
 		int y = getPaddingTop();
 		int yy = y - ((int) time_paint.ascent());
-		int text_w = (int) week_paint.measureText(str_weekday) + x;
+//		int text_w = (int) week_paint.measureText(str_weekday) + x;
+		int text_w = Math.max(	((int) week_paint.measureText(str_weekday)), 
+								((int) week_paint.measureText("PM"))) 
+								+ x;
 		int x_offset = getWidth() - text_w;
 		
 		x += x_offset + getPaddingLeft();

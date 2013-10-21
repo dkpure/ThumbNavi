@@ -1,5 +1,6 @@
 package cn.seu.dkpure;
 
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,6 +68,9 @@ public class WeatherView extends View {
 		
 		//retrieve weather information from weather_request_url
 		winfo_getter = new WeatherInfoGetter();
+//		winfo_getter.execute(
+//				"http://api.map.baidu.com/telematics/v3/trafficEvent?location=ÄÏ¾©&output=json&ak=72fe1f439a7f76ae0a8bb8be9b779ea1"
+//				);
         winfo_getter.execute(getResources().getString(R.string.weather_request_url));
 	}
 	
@@ -210,9 +215,19 @@ public class WeatherView extends View {
 				
 				String content = EntityUtils.toString(response.getEntity(), "UTF-8");
 				
+//				Properties.loadConvert()
+//				Log.v("traffic", content);
+				
 				try {
 					// The "weather content" we get from Internet is in JASON format
 					JSONObject json = new JSONObject(content).getJSONObject("weatherinfo");
+//					JSONArray jsonarr = new JSONObject(content).getJSONArray("results");
+//					Log.v("traffic", "jason numbers:" + jsonarr.length());
+//					JSONObject json = jsonarr.getJSONObject(0);
+//					String title_str = json.getString("title");
+//					Log.v("traffic", "title_str:"+ title_str);
+//					title_str = json.getString("description");
+//					Log.v("traffic", "description_str:"+ title_str);
 					
 					String temp1 = json.getString("temp1");
 					String temp2 = json.getString("temp2");

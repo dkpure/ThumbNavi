@@ -32,18 +32,16 @@
 	    android:layout_above="@+id/driving_RpmInfo"
 	    android:layout_alignParentRight="true" />
 
-	<cn.seu.dkpure.DkMapWidget
-	    android:id="@+id/driving_DkMapWidget"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_alignParentRight="true"
-	    android:layout_alignParentTop="true" />
-
 	<cn.seu.dkpure.RoadInfoBar
 	    android:id="@+id/driving_RoadInfoBar"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"
 	    android:layout_alignParentTop="true" />
+	
+	<cn.seu.dkpure.RouteNaviWidget
+	    android:id="@+id/driving_RouteNaviWidget"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content" />
 	    
 </RelativeLayout>
