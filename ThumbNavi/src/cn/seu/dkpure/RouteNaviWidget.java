@@ -12,7 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.Paint.Cap;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
@@ -23,11 +23,20 @@ import android.view.View;
 
 public class RouteNaviWidget extends View {
 	protected static final String TAG = "RouteNaviWidget";
-//	public enum AUTO_NAVI_SPEED_LEVEL {LOW, NORMAL, FAST};
-	public final int AUTO_NAVI_SPEED_LOW = 0;
-	public final int AUTO_NAVI_SPEED_NORMAL = 1;
-	public final int AUTO_NAVI_SPEED_FAST = 2;
-//	private final static int MARGIN = 20;
+	//navigation speed constants
+	public final static int AUTO_NAVI_SPEED_LOW 		= 0;
+	public final static int AUTO_NAVI_SPEED_NORMAL 		= 1;
+	public final static int AUTO_NAVI_SPEED_FAST 		= 2;
+	public final static int AUTO_NAVI_SPEED_ULTRA_LOW 	= 3;
+	//NaviInfo event constants
+	public final static int UPDATE_DISTANCE 		= 0;
+	public final static int UPDATE_STEP_DISTANCE	= 1;
+	public final static int PRE_SWITCH_NODE 		= 2;
+	public final static int SWITCH_NODE 			= 3;
+	public final static int ARRIVE_DESTINATION		= 4;
+	public final static int NAVI_START				= 5;
+	public final static int PRE_ARRIVE				= 6;
+	
 	private final static float YX_RATIO = 0.8541606f;
 	private final static double DEFAULT_PATH_STEP = 0.00005d;
 	private AtomicBoolean drawing = new AtomicBoolean(false);
@@ -37,15 +46,18 @@ public class RouteNaviWidget extends View {
 	private Float[] m_step_lat_weight = null;
 	private Float[] m_step_lon_weight = null;
 	private Point[] m_step_pts = null;
+//	private float[] m_step_pts = null;
 	private GeoPoint[] m_step_geopts = null;
 	private int		m_lon_span = 0, m_lat_span = 0;
 	private int		m_lon_min = 0, m_lat_min = 0;
+	private int		m_speed_level = AUTO_NAVI_SPEED_NORMAL;
 	
 //	private PaintFlagsDrawFilter mPfd = null;
 //	private Bitmap	m_start_bitmap = null;
 //	private Bitmap	m_end_bitmap = null;
 //	private Bitmap	m_nod_bitmap = null;
 	private Paint 	m_line_paint;
+	private Paint	m_step_paint;
 	private Path	m_driving_path;
 	private float 	wh_ratio = 1f;
 	private int		m_drawing_area_w, m_drawing_area_h;
@@ -67,6 +79,11 @@ public class RouteNaviWidget extends View {
 	private GeoPoint	m_cur_geopt = null;
 	private	double		m_cur_step_distance = 0;
 	
+	//custom interface instance
+	private UpdateNaviInfoListener m_naviinfo_listener;
+	//
+	private NaviAnalyzer m_navi_annlyzer;
+	
 	public RouteNaviWidget(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
@@ -78,6 +95,20 @@ public class RouteNaviWidget extends View {
 		super(context, attrs);
 		
 		init();
+	}
+	
+	public interface UpdateNaviInfoListener {
+		public void onEventAccured(int id, String ex_arg);
+	}
+	
+	public void setEventListener(UpdateNaviInfoListener updateNaviInfoListener) {
+		this.m_naviinfo_listener = updateNaviInfoListener;
+	}
+	
+	protected void raiseNaviEvent(int id, String ex_arg) {
+		if (m_naviinfo_listener != null) {
+			m_naviinfo_listener.onEventAccured(id, ex_arg);
+		}
 	}
 	
 	private final static float ACCEPTABLE_ERROR = 0.00001f;
@@ -124,11 +155,17 @@ public class RouteNaviWidget extends View {
 		m_line_paint.setColor(Color.argb(200, 58, 163, 244));
 		m_line_paint.setAntiAlias(true);
 		m_line_paint.setStyle(Paint.Style.STROKE);
-		m_line_paint.setStrokeWidth(8);//8
-//		m_line_paint.setStrokeCap(Cap.ROUND); //round cap
+		m_line_paint.setStrokeWidth(30);//8
+		m_line_paint.setStrokeCap(Cap.ROUND); //round cap
 		m_line_paint.setStrokeJoin(Paint.Join.ROUND); //round join
 		m_line_paint.setPathEffect(new CornerPathEffect(50));
 		
+		m_step_paint = new Paint();
+		m_step_paint.setColor(Color.argb(200, 181, 230, 29));
+		m_step_paint.setAntiAlias(true);
+		m_step_paint.setStrokeWidth(16);
+		m_step_paint.setStrokeCap(Cap.ROUND);
+				
 //		mPfd = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);			 
 		m_driving_path = new Path();
 		
@@ -154,6 +191,8 @@ public class RouteNaviWidget extends View {
 		m_indicator_paint.setAntiAlias(true);
 		m_indicator_paint.setColor(Color.argb(200, 0, 255, 50));
 		
+		m_navi_annlyzer = new NaviAnalyzer();
+		
 		m_tick_handler = new Handler();	
 		m_tick_runnable = new Runnable() {
 			@Override
@@ -168,13 +207,13 @@ public class RouteNaviWidget extends View {
 			    	if (next_step < 1.00001f) {
 			    		m_path_measure.getPosTan(m_path_measure.getLength() * (float)next_step, next_pos, null);
 			    		int tmp_angle = (int) clacAngle(next_pos[0] - cur_pos[0], 
-			    				cur_pos[1] - next_pos[1]);
+			    										cur_pos[1] - next_pos[1]);
 			    		if (Math.abs(tmp_angle - m_angle) > 2) {
 							m_angle = tmp_angle;
 						}
 			    	}
 			    	
-			    	if (m_locate_cnt++ > 19) {
+			    	if (m_locate_cnt++ > 4) {
 			    		refreshLocation(cur_pos[0], cur_pos[1]);
 			    		m_locate_cnt = 0;
 			    	}
@@ -186,7 +225,7 @@ public class RouteNaviWidget extends View {
 				}
 			    
 				if (m_current_step < 1.000001d && !m_stop_flag)
-					m_tick_handler.postDelayed(this, 50); // loop it
+					m_tick_handler.postDelayed(this, 100); // loop it
 //				else {
 //					Log.v(TAG, "m_current_step = " + m_current_step);
 //				}
@@ -200,12 +239,17 @@ public class RouteNaviWidget extends View {
     	m_cur_step_distance += distance;
     	m_prev_geopt.setLatitudeE6(m_cur_geopt.getLatitudeE6());
     	m_prev_geopt.setLongitudeE6(m_cur_geopt.getLongitudeE6());
-    	Log.v(TAG, "已经行驶 " + (int)m_cur_step_distance + " 米");
+//    	Log.v(TAG, "已经行驶 " + (int)m_cur_step_distance + " 米");
+    	m_navi_annlyzer.updateDisntance((int)m_cur_step_distance);
+    	raiseNaviEvent(UPDATE_DISTANCE, "" + (int)m_cur_step_distance);
 	}
 	
-	public void startNavigation() {
+	public void startNavigation(int speed_level) {
 		if (m_route_ok) {
+			setAutoNaviSpeedLevel(speed_level);
+			m_navi_annlyzer.initBeforeNavigation();
 			m_tick_handler.postDelayed(m_tick_runnable, 100); // trick the runnable
+			raiseNaviEvent(NAVI_START, "");
 		}
 	}
 	
@@ -215,18 +259,14 @@ public class RouteNaviWidget extends View {
 			m_tick_handler.removeCallbacks(m_tick_runnable);
 	}
 	
+	private int m_road_len = 0;
 	public void setAutoNaviSpeedLevel(int level) {
-		switch (level) {
-		case AUTO_NAVI_SPEED_LOW:
-			m_path_step = 0.0001d;
-			break;
-		case AUTO_NAVI_SPEED_NORMAL:
-			m_path_step = 0.001d;
-			break;
-		case AUTO_NAVI_SPEED_FAST:
-			m_path_step = 0.01d;
-			break;
-		}
+		// 1 / path_step * duration = s / v = t, duration = 100ms
+		if (0 != m_road_len)
+			m_path_step = (30.0f * 0.1)/ m_road_len;
+		
+		Log.v(TAG, "m_path_step = " + m_path_step);
+		m_speed_level = level;
 	}
 	
 	public void setRouteWidth(int w) {
@@ -293,17 +333,19 @@ public class RouteNaviWidget extends View {
 		
 		for (int i = 0; i < m_step_lon_weight.length; ++i) {
 			m_step_pts[i] = new Point();
-			weight2Point(m_step_lon_weight[i], m_step_lat_weight[i], m_step_pts[i]);	
+			weight2Point(m_step_lon_weight[i], m_step_lat_weight[i], m_step_pts[i]);
 		}
 		
 		m_path_measure = new PathMeasure(m_driving_path, false);
 		m_route_ok = true;
+		Log.v(TAG, "path len: " + m_path_measure.getLength());
 	}
 	
 	private void resetVars() {
 		m_angle = 0;
 		m_current_step = 0;
 		m_cur_step_distance = 0;
+		m_speed_level = AUTO_NAVI_SPEED_NORMAL;
 		m_route_ok = false;
 		m_stop_flag = false;
 		m_driving_path.reset();
@@ -311,6 +353,9 @@ public class RouteNaviWidget extends View {
 	
 	public void setRoute(MKRoute route) {
 		if (route == null) return;
+		
+		m_road_len = route.getDistance();
+		Log.v(TAG, "Total distance: " + route.getDistance());
 
 		resetVars();
 		
@@ -332,6 +377,9 @@ public class RouteNaviWidget extends View {
     			linePoints[pt_index++] = poi.get(j);
     		}
     	}
+    	
+    	m_navi_annlyzer.setRoute(route);
+    	m_navi_annlyzer.calcStepLength(linePoints);
     	
     	int min_lat, max_lat;
     	int min_lon, max_lon;
@@ -394,13 +442,17 @@ public class RouteNaviWidget extends View {
     		tmp_lon = tmp_geo.getLongitudeE6();
     		m_step_geopts[i] = tmp_geo;
     		Log.v(TAG, "distance = " + RouteParser.getPureDistance(route.getStep(i).getContent()));
+    		Log.v(TAG, route.getStep(i).getContent());
     		
     		m_step_lat_weight[i] = (float)(tmp_lat - min_lat) / (float)m_lat_span;
     		m_step_lon_weight[i] = (float)(tmp_lon - min_lon) / (float)m_lon_span;
     	}
     	
     	Log.v("RouteShowWidget", "setRoute ok!");
-    	setRouteWidth(50);
+    	if (GlobalParams.RUN_720P)
+    		setRouteWidth(70);
+    	else
+    		setRouteWidth(50);
 //    	setAutoNaviSpeedLevel(AUTO_NAVI_SPEED_LOW);
     	ZoomToLevel(15f);//10
 	}
@@ -418,27 +470,263 @@ public class RouteNaviWidget extends View {
 	protected void onSizeChanged (int w, int h, int oldw, int oldh) {
 		m_window_width_div2 = w / 2;
 		m_window_height_div2 = h / 2;
-//		Log.v(TAG, "onSizeChanged");
 	}
 	
+//	private Point m_cur_step_point = new Point();
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		if (canvas == null) throw new NullPointerException();
 
-        if (!drawing.compareAndSet(false, true)) return;
-		
+        if (!drawing.compareAndSet(false, true))
+        	return;
+
 //		canvas.setDrawFilter(mPfd);
-//        canvas.translate(this.getWidth() / 2, this.getHeight() / 2);
         canvas.translate(m_window_width_div2, m_window_height_div2);
         m_driving_path.offset(m_offset_x, m_offset_y);
 //		canvas.setMatrix(mZRotationMatrix);
 		canvas.drawPath(m_driving_path, m_line_paint);
 		m_driving_path.offset(-m_offset_x, -m_offset_y);
 		
+		// draw step node
+		if (m_step_pts != null) {
+			for (int i = 0; i < m_step_pts.length; ++i) {
+				m_step_pts[i].offset(m_offset_x, m_offset_y);
+				canvas.drawPoint(m_step_pts[i].x, m_step_pts[i].y, m_step_paint);
+				m_step_pts[i].offset(-m_offset_x, -m_offset_y);
+			}
+		}
+		
+		//draw indicator
 		canvas.rotate(m_angle);
 		canvas.drawPath(m_indicator, m_indicator_paint);
-				
+		
+		if (m_start_navi) {
+			if (0 != m_switching_node_idx) {
+//					m_cur_step_point.set(m_step_pts[m_switching_node_idx].x, m_step_pts[m_switching_node_idx].y);
+//					m_cur_step_point.offset(m_offset_x, m_offset_y);
+					int tmp_x = m_step_pts[m_switching_node_idx].x + m_offset_x;
+					int tmp_y = m_step_pts[m_switching_node_idx].y + m_offset_y;
+//					int tmp_d = (int)Math.sqrt(m_cur_step_point.x * m_cur_step_point.x + m_cur_step_point.y * m_cur_step_point.y);
+					int tmp_d = (int)Math.sqrt(tmp_x * tmp_x + tmp_y * tmp_y);
+//					Log.v(TAG, "tmp_d = " + tmp_d);
+					if (tmp_d < 12)
+						m_navi_annlyzer.switch_node();
+//					m_cur_step_point.offset(-m_offset_x, -m_offset_y);
+			} else {
+				m_navi_annlyzer.switch_node();
+			}
+		}
+		
 		drawing.set(false);
+	}
+	
+	public void printGeoPoint(GeoPoint gp, String tag) {
+		if (gp != null) {
+			Log.v(TAG, tag + " (" + gp.getLatitudeE6() + ", " + gp.getLongitudeE6() + ")");
+		}
+	}
+	
+	private boolean m_start_navi = false;
+	private int m_switching_node_idx = 0;
+	class NaviAnalyzer {
+		private MKRoute m_route = null;
+		
+		private int m_total_nodes = 0;
+		private int m_step_lengths[] = null;
+		private int m_driving_step_length= 0;
+		private GeoPoint m_step_gps[] = null;
+		
+		void setRoute(MKRoute r) {
+			if (r != null) {
+				m_route = r;
+				last_distance = 0;
+				m_start_navi = false;
+				need_prediction = false;
+				m_begin_switch = false;
+				dynamic_tolerence = GEO_XY_TOLERENCE;
+				m_total_nodes = r.getNumSteps();
+				m_step_lengths = new int[m_total_nodes - 1];
+				m_step_gps = new GeoPoint[m_total_nodes];
+				
+				for (int i = 0; i < m_total_nodes; ++i)
+					m_step_gps[i] = r.getStep(i).getPoint();
+				
+				DkDebuger.d(TAG, "m_total_nodes : " + m_total_nodes);
+			}
+		}
+		
+		void initBeforeNavigation() {
+			switch (m_speed_level) {
+			case AUTO_NAVI_SPEED_ULTRA_LOW:
+				m_distance_tolerence = 20;
+				break;
+			case AUTO_NAVI_SPEED_LOW:
+				m_distance_tolerence = 40;
+				break;
+			case AUTO_NAVI_SPEED_NORMAL:
+				m_distance_tolerence = 60;
+				break;
+			case AUTO_NAVI_SPEED_FAST:
+				m_distance_tolerence = 100;
+				break;
+			}
+			m_start_navi = true;
+			Log.v(TAG, "m_distance_tolerence = " + m_distance_tolerence);
+		}
+		
+		private int m_distance_tolerence = 40;
+		private int last_distance = 0;
+		private boolean need_prediction = false;
+		void updateDisntance(int distance) {
+			m_driving_step_length = distance - last_distance;
+			
+			if (m_begin_switch && need_prediction) {
+				int step_len_idx = m_switching_node_idx - 1;
+				if (step_len_idx >= 0 && step_len_idx < m_step_lengths.length) {
+//					Log.v(TAG, "m_begin_switch: " + m_begin_switch + "need_prediction: " + need_prediction);
+//					Log.v(TAG, "step_len: " + m_step_lengths[step_len_idx] + ", driving_len: " + m_driving_step_length);
+					if (m_step_lengths[step_len_idx] - m_driving_step_length < 120) {
+						m_begin_switch = false;
+						if (step_len_idx == m_step_lengths.length - 1)
+							raiseNaviEvent(PRE_ARRIVE, "");
+						else
+							raiseNaviEvent(PRE_SWITCH_NODE, m_route.getStep(m_switching_node_idx).getContent());
+					}
+				}
+			}
+			
+			raiseNaviEvent(UPDATE_STEP_DISTANCE, "" + m_driving_step_length);
+		}
+		
+		private boolean m_begin_switch = false;
+		void switch_node() {
+			if (m_switching_node_idx < m_total_nodes - 1)
+				++m_switching_node_idx;
+			else {
+				m_start_navi = false;
+				raiseNaviEvent(ARRIVE_DESTINATION, "");
+				return;
+			}
+			
+			//actually i want to write: last_distance = distance, but we CANNOT touch distance here,
+			//and  m_driving_step_length = distance - last_distance,
+			//so use distance =  m_driving_step_length + last_distance as
+			last_distance = last_distance + m_driving_step_length;
+			m_driving_step_length = 0;
+			m_begin_switch = true;
+			if ((m_switching_node_idx - 1 < m_step_lengths.length) && m_step_lengths[m_switching_node_idx - 1] > 200)
+				need_prediction = true;
+			else
+				need_prediction = false;
+			
+			raiseNaviEvent(SWITCH_NODE, m_route.getStep(m_switching_node_idx-1).getContent());
+		}
+		
+		/**
+		 * Really time consuming method.
+		 * Calculate the length/distance between every two step node
+		 * @param pts: GeoPoints along the route
+		 */
+		void calcStepLength(GeoPoint[] pts) {
+			if (pts == null || m_route == null) {
+				Log.e(TAG, "In calcStepLength: null pts or null m_route");
+				return;
+			}
+			
+			//fill the gp_idx array preliminary
+//    		Log.v(TAG, "check begin, " + m_total_nodes + " points to be checked...");
+    		int gp_idx[] = new int[m_total_nodes];
+    		int last_idx = 0;
+    		for (int i = 0; i < m_total_nodes; ++i) {
+    			GeoPoint cgp = m_route.getStep(i).getPoint();
+    			gp_idx[i] = -1;
+    			for (int j = last_idx; j < pts.length; ++j) {
+    				if (pts[j].equals(cgp)) {
+    					last_idx = j + 1;
+    					gp_idx[i] = j;
+//    					Log.v(TAG, "The" + i + "th Geopoint equals!");
+    				}
+    			}
+    		}
+    		
+    		//fix gp_idx array
+    		do {
+	        	for (int i = 0; i < gp_idx.length; ++i) {
+//	        		Log.v(TAG, "gp_idx[" + i + "] = " + gp_idx[i]);
+	        		if (-1 == gp_idx[i]) {
+	        			int l, h;
+	        			for (l = i - 1; ;--l) {
+	        				if ( l < 0) {
+	            				gp_idx[i] = 0;
+	            				break;
+	            			}
+	        				
+	        				if (-1 != gp_idx[l])
+	        					break;
+	        			}
+	
+	        			for (h = i + 1; ;++h) {
+		        			if (h >= gp_idx.length) {
+		        				gp_idx[i] = pts.length - 1;
+		        				break;
+		        			}
+		        			
+		        			if (-1 != gp_idx[h])
+	        					break;
+	        			}
+	        			
+	        			if (l < 0 || h >= gp_idx.length)
+	        				continue;
+	        			
+//	        			DkDebuger.d(TAG, "l: " + l + ", h: " + h);
+	        			GeoPoint cgp = m_route.getStep(i).getPoint();
+	        			for (int j = gp_idx[l] + 1; j < gp_idx[h]; ++j) {
+//	        				Log.v(TAG, "pts around: (" + pts[j].getLatitudeE6() + "," + pts[j].getLongitudeE6() + ")");
+	        				if (geoEquals(pts[j], cgp)) {
+	        					gp_idx[i] = j;
+//	        					Log.v(TAG, "new gp_idx[" + i + "] = " + gp_idx[i]);
+//	        					Log.v(TAG, "cgp: ("+ cgp.getLatitudeE6() + "," + cgp.getLongitudeE6() + ")");
+	        					break;
+	        				}
+	        			}
+	        		}
+	        	}
+	        	dynamic_tolerence += GEO_XY_TOLERENCE_STEP;
+    		} while (isInvalidIdxArray(gp_idx));
+    		dynamic_tolerence = GEO_XY_TOLERENCE;
+    		
+    		//calculate step length
+    		for (int i = 0; i < m_step_lengths.length; ++i) {
+    			double len = 0;
+    			for (int j = gp_idx[i]; j < gp_idx[i+1]; ++j) {
+    				len += DistanceUtil.getDistance(pts[j], pts[j+1]);
+//    				Log.v(TAG, "len = " + len);
+    			}
+    			
+    			m_step_lengths[i] = (int)len;
+//    			Log.v(TAG, "step length " + i + ": " + m_step_lengths[i]);
+    		}
+		}
+		
+		boolean isInvalidIdxArray(int idx[]) {
+			for (int i = 0; i < idx.length; ++i) {
+				if (-1 == idx[i])
+					return true;
+			}
+			
+			return false;
+		}
+		
+		private static final int GEO_XY_TOLERENCE = 30;
+		private static final int GEO_XY_TOLERENCE_STEP = 20;
+		private int dynamic_tolerence = GEO_XY_TOLERENCE;
+		final boolean geoEquals(GeoPoint p1, GeoPoint p2) {
+			if (Math.abs(p1.getLatitudeE6() - p2.getLatitudeE6()) < dynamic_tolerence && 
+					Math.abs(p1.getLongitudeE6() - p2.getLongitudeE6()) < dynamic_tolerence)	
+				return true;
+			else
+				return false;
+		}
 	}
 }

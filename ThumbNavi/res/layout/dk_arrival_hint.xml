@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#00000000"
+    android:gravity="bottom"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/dkarrivalhint_static"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="剩余："
+        android:textColor="#FFFFFFFF"
+        android:textSize="50sp" />
+
+    <TextView
+        android:id="@+id/dkarrivalhint_dynamic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="100sp"
+        android:textColor="#FFB1F118"
+        android:text="5.6Km" />
+</LinearLayout>

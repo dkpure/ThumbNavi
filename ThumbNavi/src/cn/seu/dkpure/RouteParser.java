@@ -10,13 +10,14 @@ public class RouteParser {
 		if (cline.contains("进入") || cline.contains("上匝道") || cline.contains("到达")) {
 			if (cline.contains("进入")) {
 				int index0 = cline.lastIndexOf("进入");
-				int index1 = cline.lastIndexOf("-");
+//				int index1 = cline.lastIndexOf("-");
 				
-				if (index1 > 0) {
-					retstr = cline.substring(index0 + 2, index1).trim();
-				} else {
-					retstr = cline.substring(index0 + 2);
-				}
+//				if (index1 > 0) {
+//					retstr = cline.substring(index0 + 2, index1).trim();
+//				} else {
+//					retstr = cline.substring(index0 + 2);
+//				}
+				retstr = cline.substring(index0 + 2);
 			} else if (cline.contains("上匝道")) {
 				retstr = "匝道";
 			} else if (cline.contains("到达")) {
@@ -26,6 +27,8 @@ public class RouteParser {
 				Log.v("RouteDirectionParser", "warning: can not parse destination!");
 			}
 		} else {
+			if (cline.contains("靠左") || cline.contains("靠右") )
+				retstr = cline;
 			Log.v("RouteDirectionParser", "warning: can not parse destination!");
 		}
 		
@@ -72,7 +75,7 @@ public class RouteParser {
 		return retstr;
 	}
 	
-	private int parseDirectionIndex(String dir) {
+	static int parseDirectionIndex(String dir) {
 		if (null == dir || dir.equals("")) {
 			return RouteDirectionConstants.ROUTE_DIR_UNKNOWN;
 		}
@@ -82,9 +85,15 @@ public class RouteParser {
 		
 		if (dir.equalsIgnoreCase("直行")) {
 			ret = RouteDirectionConstants.ROUTE_DIR_GO_STRAIGHT;
-		} else if (dir.equalsIgnoreCase("左前方转弯") || dir.equalsIgnoreCase("稍向左转")) {
+		} else if (dir.equalsIgnoreCase("左前方转弯")
+				|| dir.equalsIgnoreCase("稍向左转")
+				|| dir.equalsIgnoreCase("靠左")
+				) {
 			ret = RouteDirectionConstants.ROUTE_DIR_TURN_LEFT0;
-		} else if (dir.equalsIgnoreCase("右前方转弯") || dir.equalsIgnoreCase("稍向右转")) {
+		} else if (dir.equalsIgnoreCase("右前方转弯")
+				|| dir.equalsIgnoreCase("稍向右转")
+				|| dir.equalsIgnoreCase("靠右")
+				) {
 			ret = RouteDirectionConstants.ROUTE_DIR_TURN_RIGHT0;
 		} else if (dir.equalsIgnoreCase("左转")) {
 			ret = RouteDirectionConstants.ROUTE_DIR_TURN_LEFT1;
@@ -104,14 +113,24 @@ public class RouteParser {
 		return ret;		
 	}
 	
-	int getDirectionIndex(String cline) {
+	static int getDirIndexFromContent(String cline) {
 		
 		String dirstr = getDirection(cline);
 		
 		if (null == dirstr || dirstr.equals("")) {
-			return RouteDirectionConstants.ROUTE_DIR_UNKNOWN;
+//			return RouteDirectionConstants.ROUTE_DIR_UNKNOWN;
+			return RouteDirectionConstants.ROUTE_DIR_GO_STRAIGHT;
 		} else {
 			return parseDirectionIndex(dirstr);
+		}
+	}
+	
+	static int getDirIndexFromDir(String dir) {
+		if (null == dir || dir.equals("")) {
+//			return RouteDirectionConstants.ROUTE_DIR_UNKNOWN;
+			return RouteDirectionConstants.ROUTE_DIR_GO_STRAIGHT;
+		} else {
+			return parseDirectionIndex(dir);
 		}
 	}
 	

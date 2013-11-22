@@ -1,5 +1,7 @@
 package cn.seu.dkpure;
 
+import cn.seu.dkpure.RouteNaviWidget.UpdateNaviInfoListener;
+
 import com.baidu.mapapi.BMapManager;
 import com.baidu.mapapi.search.MKAddrInfo;
 import com.baidu.mapapi.search.MKBusLineResult;
@@ -16,7 +18,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -28,13 +29,15 @@ import android.view.WindowManager;
 public class ThumbNaviDriving extends Activity {
 	private final String TAG = "ThumbNaviDriving";
 	private final String CITY = "南京";
-//	private DkMapWidget 	wg_dkmap = null;
-	private RouteNaviWidget wg_routenavi = null;
-	private RoadInfoBar		wg_roadinfo = null;
-	private GearInfo 		wg_gearinfo = null;
-	private RpmInfo			wg_rpminfo = null;
-	private	SpeedInfo		wg_speedinfo = null;
-	private MKSearch 		mSearch = null;
+	private RouteNaviWidget 	wg_routenavi = null;
+	private SingleNodeBar		wg_singlenodebar = null;
+//	private ObdInfoOnDriving	wg_obdinfo = null;
+	private GearInfo 			wg_gearinfo = null;
+	private RpmInfo				wg_rpminfo = null;
+	private	SpeedInfo			wg_speedinfo = null;
+	private ArrivalHintBar  	wg_arrivalhintbar = null;
+	
+	private MKSearch 			mSearch = null;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,8 +75,11 @@ public class ThumbNaviDriving extends Activity {
 				}
 				
 				if (wg_routenavi != null) {
+					Log.v(TAG, "Got " + res.getNumPlan() + " plans!");
+					if (wg_arrivalhintbar != null)
+						wg_arrivalhintbar.setTotalDistance(res.getPlan(0).getRoute(0).getDistance());
 					wg_routenavi.setRoute(res.getPlan(0).getRoute(0));
-					wg_routenavi.startNavigation();
+					wg_routenavi.startNavigation(RouteNaviWidget.AUTO_NAVI_SPEED_LOW);
 				}
 			}
 
@@ -118,7 +124,10 @@ public class ThumbNaviDriving extends Activity {
 		MKPlanNode stNode = new MKPlanNode();
 		stNode.name = "总统府";//"东南大学";//
 		MKPlanNode enNode = new MKPlanNode();
-		enNode.name = "河定桥";//"鼓楼区";//
+		//"大行宫";//"安德门";//"河定桥";//"珍珠泉";
+		//"莫愁湖";//"淳化";//"鼓楼区";//"夫子庙";
+		//"草场门";
+		enNode.name = "栖霞山";
 		
 		// 实际使用中请对起点终点城市进行正确的设定
 		mSearch.setDrivingPolicy(MKSearch.ECAR_TIME_FIRST);//MKSearch.ECAR_DIS_FIRST
@@ -126,56 +135,98 @@ public class ThumbNaviDriving extends Activity {
 	}
 	
 	private void emergeViews() {
-    	wg_roadinfo = (RoadInfoBar) findViewById(R.id.driving_RoadInfoBar);
+		wg_singlenodebar = (SingleNodeBar) findViewById(R.id.driving_SingleNodeBar);
     	wg_gearinfo = (GearInfo) findViewById(R.id.driving_GearInfo);
     	wg_rpminfo = (RpmInfo) findViewById(R.id.driving_RpmInfo);
     	wg_speedinfo = (SpeedInfo) findViewById(R.id.driving_SpeedInfo);
-//    	wg_dkmap 	= (DkMapWidget) findViewById(R.id.driving_DkMapWidget);
 		wg_routenavi = (RouteNaviWidget) findViewById(R.id.driving_RouteNaviWidget);
+		wg_arrivalhintbar = (ArrivalHintBar) findViewById(R.id.driving_ArrivalHintBar);
+    	
+		if (wg_arrivalhintbar != null) {
+			wg_arrivalhintbar.setVisibility(View.INVISIBLE);
+			wg_arrivalhintbar.bringToFront();
+		}
+    	
+    	if (wg_routenavi != null) {
+    		wg_routenavi.setEventListener(new UpdateNaviInfoListener() {
+
+				@Override
+				public void onEventAccured(int id, String ex_arg) {
+					// TODO Auto-generated method stub
+					switch(id) {
+					case RouteNaviWidget.NAVI_START:
+						Log.e(TAG, "start navigation!");
+						m_vObd_engine.start();
+						break;
+					case RouteNaviWidget.SWITCH_NODE:
+						Log.e(TAG, "switch node!");
+						wg_singlenodebar.switchNode(ex_arg);
+						break;
+					case RouteNaviWidget.PRE_SWITCH_NODE:
+						Log.e(TAG, "pre switch node!");
+						wg_singlenodebar.preSwitchNode(ex_arg);
+						break;
+					case RouteNaviWidget.UPDATE_STEP_DISTANCE:
+						wg_singlenodebar.updateDistance(ex_arg);
+						break;
+					case RouteNaviWidget.UPDATE_DISTANCE:
+						wg_arrivalhintbar.updateCurrentDistance(Integer.parseInt(ex_arg));
+						break;
+					case RouteNaviWidget.ARRIVE_DESTINATION:
+						m_vObd_engine.stop();
+						DkDebuger.v(TAG, "arrived!");
+						break;
+					case RouteNaviWidget.PRE_ARRIVE:
+						m_vObd_engine.preArrive();
+						DkDebuger.v(TAG, "pre arrive!");
+						break;
+					}
+				}
+    		});
+    	}
     	
     	if (wg_rpminfo != null) {
-    		wg_rpminfo.setValue(1356);
+    		wg_rpminfo.setValue(0);
     		wg_rpminfo.bringToFront();
     	}
     	
     	if (wg_speedinfo != null) {
-    		wg_speedinfo.setValue(76);
+    		wg_speedinfo.setValue(0);
     		wg_speedinfo.bringToFront();
     	}
     	
     	if (wg_gearinfo != null) {
     		wg_gearinfo.bringToFront();
-    		wg_gearinfo.setGear(GearInfo.GAER_ENUMS.GEAR_R);
-	    	wg_gearinfo.setOnClickListener(new OnClickListener () {
-	
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					
-					int g_index = (int)(Math.random() * 7);
-					GearInfo.GAER_ENUMS g = GearInfo.GAER_ENUMS.GEAR_N;
-					switch (g_index) {
-					case 0: g = GearInfo.GAER_ENUMS.GEAR_N; break;
-					case 1: g = GearInfo.GAER_ENUMS.GEAR_1; break;
-					case 2: g = GearInfo.GAER_ENUMS.GEAR_2; break;
-					case 3: g = GearInfo.GAER_ENUMS.GEAR_3; break;
-					case 4: g = GearInfo.GAER_ENUMS.GEAR_4; break;
-					case 5: g = GearInfo.GAER_ENUMS.GEAR_5; break;
-					case 6: g = GearInfo.GAER_ENUMS.GEAR_R; break;
-					}
-					wg_gearinfo.animateSwitchGear(g);
-				}
-	    		
-	    	});
+    		wg_gearinfo.setGear(GearInfo.GAER_ENUMS.GEAR_N);
     	}
 	    
-    	if (wg_roadinfo != null) {
-    		wg_roadinfo.bringToFront();
-	    	wg_roadinfo.addNode(0, "卡子门高架 - 300m");
-	    	wg_roadinfo.addNode(7, "龙蟠中路 - 2.6Km");
-	    	wg_roadinfo.addNode(2, "机场连接线 - 90m");
-	    	wg_roadinfo.addNode(6, "机场连接线 - 30m");
+    	if (wg_singlenodebar != null) {
+    		wg_singlenodebar.setVisibility(View.INVISIBLE);
+    		wg_singlenodebar.bringToFront();
     	}
+	}
+	
+	private VirtualObdEngine m_vObd_engine = new VirtualObdEngine();
+	class VirtualObdEngine {
+		void start() {
+			wg_speedinfo.start();
+			wg_rpminfo.start();
+			wg_gearinfo.start();
+		}
+		
+		void stop() {
+//			wg_speedinfo.stop();
+//			wg_rpminfo.stop();
+//			wg_gearinfo.stop();
+			wg_singlenodebar.arrival();
+			wg_arrivalhintbar.stop();
+		}
+		
+		void preArrive() {
+			wg_speedinfo.stop();
+			wg_rpminfo.stop();
+			wg_gearinfo.stop();
+		}
 	}
 	
 	@Override

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -13,24 +14,36 @@ import android.view.View;
  *
  */
 public class RpmInfo extends View {
-	final static String RPM_UNIT_STRING = "ת";
-	final static int	DEFAULT_TEXT_SIZE = 40;
+	final static int	DEFAULT_TEXT_SIZE = 120;//40;
 	final static int	DEFAULT_NUMBER_COLOR = Color.rgb(177, 241, 24);
 	final static int	DEFAULT_UNIT_COLOR = Color.WHITE;
 	
+	//private states
+	private static final int S_IDLE 		= 0;
+	private static final int S_STARTUP 		= 1;
+	private static final int S_RUNNING 		= 2;
+	private static final int S_SLOWDOWN 	= 3;
+	private int m_state = S_IDLE;
+		
 	// attributes
 	private	int		current_val;
-	private	int		text_size;
+//	private	int		text_size;
 	private int		number_color;
 	private	int		unit_color;
 	
 	// graphics related
-	private	Paint	text_paint;
-	private	int		y_margin = 10;
-	private	int		x_split	= 8;
+	private	Paint	text_paint = null;
+	private Paint	unit_paint = null;
+//	private	int		y_margin = 0;//10;
 	private int		base_line = 0;
 	private int		text_w = 0;
 	private int		unit_string_x = 0;
+	private String	m_rpm_unit;
+	
+	//Handler and Runnable
+	private Handler 	m_tick_handler = null;
+	private Runnable 	m_tick_runnable = null;
+	private int			m_delay_cnt = 0;
 	
 	public RpmInfo(Context context) {
 		super(context);
@@ -50,7 +63,7 @@ public class RpmInfo extends View {
 	 * @param val RPM value to be set, must be positive
 	 */
 	public void setValue(int val) {
-		if (val > 0) {
+		if (val >= 0) {
 			if (needResize(val))
 				requestLayout(); // Invoke OnMeasure()
 			
@@ -71,28 +84,88 @@ public class RpmInfo extends View {
 	 */
 	private void init() {
 		current_val = 0;
-		text_size = DEFAULT_TEXT_SIZE;
+//		text_size = DEFAULT_TEXT_SIZE;
 		number_color = DEFAULT_NUMBER_COLOR;
 		unit_color = DEFAULT_UNIT_COLOR;
 		
 		text_paint = new Paint();
 		text_paint.setAntiAlias(true);
-		text_paint.setTextSize(text_size);
 		text_paint.setColor(number_color);
+		
+		unit_paint = new Paint();
+		unit_paint.setAntiAlias(true);
+		unit_paint.setColor(unit_color);
+		
+		if (GlobalParams.RUN_720P) {
+			text_paint.setTextSize(110);
+			unit_paint.setTextSize(60);
+		} else {
+			text_paint.setTextSize(60);
+			unit_paint.setTextSize(40);
+		}
+		
+		m_rpm_unit = getResources().getString(R.string.obd_RPM_unit);
+		
+		m_tick_handler = new Handler();	
+		m_tick_runnable = new Runnable() {
+			@Override
+			public void run() {
+				switch (m_state) {
+				case S_IDLE:
+					if (m_started) {
+						m_state = S_STARTUP;
+						m_tick_handler.postDelayed(this, 100);
+					}
+					break;
+				case S_STARTUP:
+					if (m_delay_cnt < 4) {
+						// Assume this:
+						// at startup period, speed grows form 0 to 1500rpm within 4 seconds
+						setValue((int)((m_delay_cnt + Math.random()) * 375.0f));
+						m_delay_cnt++;
+						m_tick_handler.postDelayed(this, 1000);
+					} else {
+						m_delay_cnt = 0;
+						m_state = S_RUNNING;
+						m_tick_handler.postDelayed(this, 4000); // loop it
+					}
+					break;
+				case S_RUNNING:
+					if (!m_started) {
+						m_state = S_SLOWDOWN;
+						m_tick_handler.postDelayed(this, 100);
+					} else {
+						setValue(1700 + (int)((Math.random() - 0.5f) * 400));
+						m_tick_handler.postDelayed(this, 4000); // loop it
+					}
+					break;
+				case S_SLOWDOWN:
+					if (m_delay_cnt < 4) {
+						setValue((int)(((3 - m_delay_cnt) + Math.random()) * 375.0f));
+						++m_delay_cnt;
+						m_tick_handler.postDelayed(this, 1000);
+					} else {
+						setValue(0);
+						m_state = S_IDLE;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		};
+	}
+	
+	private boolean m_started = false;
+	public void start() {
+		m_started = true;
+		m_tick_handler.postDelayed(m_tick_runnable, 100); // trick the runnable after 1 second
+	}
+	
+	public void stop() {
+		m_started = false;
 	}
 
-	/**
-     * Return the baseline of text Paint when align to H vertically
-     * @param H height to put text
-     * @param p text paint
-     * @return baseline of text to be drawn within H
-     */
-	private int getCenterAlignBaseline(int H, Paint p) {
-		int text_ascent = -(int) p.ascent();
-		int text_descent = (int) p.descent();
-		
-		return (H + text_ascent - text_descent) / 2;
-	}
 	
 	/**
 	 * 
@@ -101,17 +174,16 @@ public class RpmInfo extends View {
 	private int getSuitableWidth() {
     	int ret = 10; // set minimal width to 10
     	
-    	if (null != text_paint) {
+    	if (null != text_paint && null != unit_paint) {
     		String tmp = String.valueOf(current_val);
-    		
     		if (tmp.length() > 4) {
     			text_w = (int) text_paint.measureText(tmp);
     		} else {
     			text_w = (int) text_paint.measureText("8888");
     		}
-    		
-    		ret = text_w + x_split + (int) text_paint.measureText(RPM_UNIT_STRING);
-    		unit_string_x = ret - (int) text_paint.measureText(RPM_UNIT_STRING);
+
+    		ret = text_w + x_split + (int) unit_paint.measureText(m_rpm_unit);
+    		unit_string_x = ret - (int) unit_paint.measureText(m_rpm_unit);
     	}
     	
     	return ret;
@@ -124,13 +196,26 @@ public class RpmInfo extends View {
     private int getSuitableHeight() {
     	int ret = 10; // set minimal height to 10
     	
-    	if (null != text_paint) {
-    		ret  = -(int) text_paint.ascent() + (int) text_paint.descent() + y_margin;
-    		base_line = getCenterAlignBaseline(ret, text_paint);
+    	if (null != text_paint && null != unit_paint) {
+    		ret  = -(int) text_paint.ascent() + (int) text_paint.descent();
+    		base_line = -(int) text_paint.ascent();//getCenterAlignBaseline(ret, text_paint);
     	}
     	
     	return ret;
     }
+    
+    /**
+     * Return the baseline of text Paint when align to H vertically
+     * @param H height to put text
+     * @param p text paint
+     * @return baseline of text to be drawn within H
+     */
+//	private int getCenterAlignBaseline(int H, Paint p) {
+//		int text_ascent = -(int) p.ascent();
+//		int text_descent = (int) p.descent();
+//		
+//		return (H + text_ascent - text_descent) / 2;
+//	}
     
     private int measureWidth(int measureSpec) {
         int result = 0;
@@ -178,6 +263,8 @@ public class RpmInfo extends View {
 	            measureHeight(heightMeasureSpec));
 	}
 	
+
+	private	int		x_split	= 15;
 	@Override
 	protected void onDraw (Canvas canvas) {
 		super.onDraw(canvas);
@@ -186,10 +273,8 @@ public class RpmInfo extends View {
 		int cur_text_w = (int) text_paint.measureText(val_str);
 		int x = (text_w - cur_text_w) / 2;
 		
-		text_paint.setColor(number_color);
 		canvas.drawText(val_str, x, base_line, text_paint); //draw value
-		text_paint.setColor(unit_color);
-		canvas.drawText(RPM_UNIT_STRING, unit_string_x, base_line, text_paint); // draw unit
+		canvas.drawText(m_rpm_unit, unit_string_x, base_line, unit_paint); // draw unit
 	}
 	
 }

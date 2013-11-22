@@ -2,10 +2,9 @@ package cn.seu.dkpure;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-//import android.util.Log;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -13,7 +12,6 @@ import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,26 +24,33 @@ import android.widget.LinearLayout;
 public class ThmbNaiviMain extends Activity {
 	private DkMapWidget 	wg_dkmap = null;
 	private LinearLayout 	wg_obdinfo = null;
-	private DigitalClock	wg_clock;
+	private DigitalClock	wg_clock = null;
 	
 	private ImageView		wg_sign_seatbelt;
 	private ImageView		wg_sign_fontlight;
 	private ImageView		wg_sign_turnleft;
 	private ImageView		wg_sign_gas;
 	
+//	private PowerManager.WakeLock m_pm_wakelock = null;
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // set no title & fullscreen before setContentView
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
 		        					WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		
-		setContentView(R.layout.main);
+		//prevent system from sleeping
+//		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//		m_pm_wakelock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
+//		m_pm_wakelock.acquire();
 		
+		setContentView(R.layout.main);
 		emergeViews();
 		dashboardSignsAnimShow();
     }
@@ -77,32 +82,40 @@ public class ThmbNaiviMain extends Activity {
     	}
     	if (wg_obdinfo != null) {
     		wg_obdinfo.bringToFront(); //bring to the top layer
-
-//    		wg_obdinfo.setOnClickListener(
-//	    				new OnClickListener() {
-//
-//							@Override
-//							public void onClick(View v) {
-//								// TODO Auto-generated method stub
-//								startDrivingActivity();
-//							}
-//	    					
-//	    				}
-//    				);
     	}
     	
     	wg_sign_seatbelt = (ImageView) findViewById(R.id.imgV_sign_seatbelt);
     	wg_sign_fontlight = (ImageView) findViewById(R.id.imgV_sign_frontlight);
     	wg_sign_turnleft = (ImageView) findViewById(R.id.imgV_sign_turnleft);
     	wg_sign_gas = (ImageView) findViewById(R.id.imgV_sign_gas);
-    	if (wg_sign_seatbelt != null)
+    	if (wg_sign_seatbelt != null) {
+    		if (GlobalParams.RUN_720P)
+    			wg_sign_seatbelt.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_seat_belt_166x156));
+    			
     		wg_sign_seatbelt.setVisibility(View.INVISIBLE);
-    	if (wg_sign_fontlight != null)
+    	}
+    	
+    	if (wg_sign_fontlight != null) {
+    		if (GlobalParams.RUN_720P)
+    			wg_sign_fontlight.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_high_light_beam_166x156));
     		wg_sign_fontlight.setVisibility(View.INVISIBLE);
-    	if (wg_sign_turnleft != null)
+    	}
+    	
+    	if (wg_sign_turnleft != null) {
+    		if (GlobalParams.RUN_720P)
+    			wg_sign_turnleft.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_turn_left_166x156));
     		wg_sign_turnleft.setVisibility(View.INVISIBLE);
-    	if (wg_sign_gas != null)
+    	}
+    	
+    	if (wg_sign_gas != null) {
+    		if (GlobalParams.RUN_720P)
+    			wg_sign_gas.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_gas_166x156));
     		wg_sign_gas.setVisibility(View.INVISIBLE);
+    	}
     }
     
     private void dashboardSignsAnimShow() {
@@ -151,9 +164,8 @@ public class ThmbNaiviMain extends Activity {
 				case 0: if (wg_sign_seatbelt != null) wg_sign_seatbelt.setVisibility(View.VISIBLE); break;
 				case 1: if (wg_sign_fontlight != null) wg_sign_fontlight.setVisibility(View.VISIBLE); break;
 				case 2: if (wg_sign_turnleft != null) wg_sign_turnleft.setVisibility(View.VISIBLE); break;
-				case 3:  if (wg_sign_gas != null) wg_sign_gas.setVisibility(View.VISIBLE); break;
-				default:
-					break;
+				case 3: if (wg_sign_gas != null) wg_sign_gas.setVisibility(View.VISIBLE); break;
+				default: break;
 				}
 			}
 	    });
@@ -165,6 +177,8 @@ public class ThmbNaiviMain extends Activity {
     
     @Override
     protected void onPause() {
+    	DkDebuger.v("Main Activity", "OnPause");
+//    	m_pm_wakelock.release();
     	if (wg_dkmap != null)
     		wg_dkmap.onPause();
         super.onPause();

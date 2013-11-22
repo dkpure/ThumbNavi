@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -21,7 +20,8 @@ import android.view.animation.Animation;
 public class DkBanner extends FrameLayout {
 
 	static final long	BANNER_SWITCH_DURATION = 8000;
-	static final int	BANNER_TEXT_DEFAULT_SIZE = 26;
+//	static final int	BANNER_TEXT_DEFAULT_SIZE = 26;
+	private int 		m_text_size = 26;
 	private TextView	m_text_banner1;
 	private TextView 	m_text_banner2;
 	private Animation	m_in_anim;
@@ -45,15 +45,19 @@ public class DkBanner extends FrameLayout {
 	}
 	
 	private void init(Context context) {
+		if (GlobalParams.RUN_720P)
+			m_text_size = 52;
+		else
+			m_text_size = 26;
+		
 		m_text_banner1 = (TextView) findViewById(R.id.dkbanner_text1);
 		m_text_banner2 = (TextView) findViewById(R.id.dkbanner_text2);
 		
-//		m_text_banner1.setTextColor(Color.WHITE);
-		m_text_banner1.setTextColor(Color.rgb(0, 162, 232));
-		m_text_banner1.setTextSize(BANNER_TEXT_DEFAULT_SIZE);
+		m_text_banner1.setTextColor(Color.rgb(199, 31, 241));//(Color.rgb(0, 162, 232));
+		m_text_banner1.setTextSize(m_text_size);
 		
-		m_text_banner2.setTextColor(Color.rgb(0, 162, 232));
-		m_text_banner2.setTextSize(BANNER_TEXT_DEFAULT_SIZE);
+		m_text_banner2.setTextColor(Color.rgb(199, 31, 241));//(Color.rgb(0, 162, 232));
+		m_text_banner2.setTextSize(m_text_size);
 		m_text_banner2.setVisibility(View.INVISIBLE);
 		
 		m_in_anim = AnimationUtils.loadAnimation(context, R.anim.push_up_in);

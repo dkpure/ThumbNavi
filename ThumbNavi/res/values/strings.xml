@@ -4,8 +4,11 @@
     <string name="activity_driving">ActivityDriving</string>
     <!-- use http://www.weather.com.cn/data/cityinfo/101190101.html instead of 
     		 http://m.weather.com.cn/data/101190101.html -->
-    <!--  <string name="weather_request_url">http://m.weather.com.cn/data/101190101.html</string> -->
+    <string name="fine_weather_request_url">http://www.weather.com.cn/data/cityinfo/101190101.html</string>
+    <string name="unreliable_weather_request_url">http://m.weather.com.cn/data/101190101.html</string>
     
-    <string name="weather_request_url">http://www.weather.com.cn/data/cityinfo/101190101.html</string>
-    
+    <!-- OBD Unit Text -->
+    <string name="obd_gear_unit">档</string>
+    <string name="obd_RPM_unit">Rpm</string>
+    <string name="obd_Speed_unit">Mph</string>
 </resources>

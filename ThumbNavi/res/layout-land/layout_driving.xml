@@ -4,8 +4,8 @@
     android:layout_height="match_parent"
     android:background="#000000" >
 
-	<cn.seu.dkpure.DigitalClock
-	    android:id="@+id/driving_DigitalClock"
+	<cn.seu.dkpure.ArrivalHintBar
+	    android:id="@+id/driving_ArrivalHintBar"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentBottom="true"
@@ -32,8 +32,8 @@
 	    android:layout_above="@+id/driving_RpmInfo"
 	    android:layout_alignParentRight="true" />
 
-	<cn.seu.dkpure.RoadInfoBar
-	    android:id="@+id/driving_RoadInfoBar"
+	<cn.seu.dkpure.SingleNodeBar
+	    android:id="@+id/driving_SingleNodeBar"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"

@@ -48,19 +48,21 @@
                 android:src="@drawable/sign_gas" />
         </LinearLayout>
 
-        <cn.seu.dkpure.NotifBar
-            android:id="@+id/main_NotifBar"
+        <cn.seu.dkpure.DkBanner
+            android:id="@+id/main_banner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_marginLeft="20dp" 
+            android:layout_marginTop="5dp" />
 
         <cn.seu.dkpure.WeatherView
             android:id="@+id/main_WeatherView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/main_NotifBar"
+            android:layout_below="@+id/main_banner"
             android:layout_marginTop="56dp" />
 
         <cn.seu.dkpure.DigitalClock
@@ -68,15 +70,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/main_NotifBar" />
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="15dp" />
 
         <cn.seu.dkpure.DkMapWidget
             android:id="@+id/main_DkMapWidget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/main_WeatherView"
-            android:layout_marginTop="20dp" >
+            android:layout_below="@+id/main_DigitalClock"
+            android:layout_marginTop="4dp"
+            android:layout_toRightOf="@+id/main_WeatherView" >
         </cn.seu.dkpure.DkMapWidget>
 
     </RelativeLayout>

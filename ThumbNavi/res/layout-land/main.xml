@@ -71,7 +71,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/main_DigitalClock"
             android:layout_marginTop="4dp"
-            android:layout_toLeftOf="@+id/main_DigitalClock" >
+            android:layout_marginLeft="15dp"
+            android:layout_toRightOf="@+id/main_WeatherView" >
         </cn.seu.dkpure.DkMapWidget>
 
         <cn.seu.dkpure.WeatherView

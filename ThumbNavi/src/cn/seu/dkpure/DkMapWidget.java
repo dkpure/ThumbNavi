@@ -47,6 +47,15 @@ public class DkMapWidget extends FrameLayout {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inflater.inflate(R.layout.dk_mapview, this);
 		
+//		if (GlobalParams.RUN_720P) {
+////			this.getLayoutParams().width = 500;
+////			this.getLayoutParams().height = 360;
+//			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(500, 360);
+////			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(500, 360);
+//			this.setLayoutParams(lp);
+//			this.requestLayout();
+//		}
+		
 		init(context);
 	}
 	
@@ -72,6 +81,13 @@ public class DkMapWidget extends FrameLayout {
         // initialize mapView and mapController
         mMapView = (MapView)findViewById(R.id.bmapView);
         mMapView.getController().setCenter(cur_location_point);
+        
+//		if (GlobalParams.RUN_720P) {
+//			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(500, 360);
+//			this.setLayoutParams(lp);
+//			mMapView.setLayoutParams(lp);
+//			this.requestLayout();
+//		}
         
         mMapController = mMapView.getController();
         mMapController.enableClick(true);

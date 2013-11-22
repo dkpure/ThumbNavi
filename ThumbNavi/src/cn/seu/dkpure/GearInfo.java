@@ -6,9 +6,10 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
@@ -19,23 +20,32 @@ import android.view.animation.AccelerateDecelerateInterpolator;
  */
 public class GearInfo extends View implements Runnable{
 	public enum GAER_ENUMS {GEAR_N, GEAR_1, GEAR_2, GEAR_3, GEAR_4, GEAR_5, GEAR_R};
-	final static String GEAR_UNIT_STRING = "µµ";
+//	final static String m_gear_unit = "µµ";
+	private final String TAG = "GearInfo";
 	final static String	GEAR_ENUM_STRING = "¿Õ12345R";
 	final static int	MIN_REFRESH_DURATION = 30; // refresh rate: 1000/30=33fps
 	final static int	DEFAULT_ANIMATION_DURATION = 800; //in ms
-	final static int	DEFAULT_TEXT_SIZE = 40;
+	final static int	DEFAULT_TEXT_SIZE = 140;//60;//40;
 	final static int	DEFAULT_NUMBER_COLOR = Color.rgb(177, 241, 24);
 	final static int	DEFAULT_UNIT_COLOR = Color.WHITE;
 	
+	//private states
+	private static final int S_IDLE 		= 0;
+	private static final int S_STARTUP 		= 1;
+	private static final int S_RUNNING 		= 2;
+	private static final int S_SLOWDOWN 	= 3;
+	private int m_state = S_IDLE;
+		
 	// attributes
 	private	GAER_ENUMS	current_gear;
 	private	int		text_size;
 	private int		number_color;
-	private	int		unit_color;
+//	private	int		unit_color;
+//	private String	m_gear_unit;
 	
 	// graphics related
-	private	int		y_margin = 10;
-	private	int		x_split	= 8;
+	private	int		y_margin = 0;//10;
+//	private	int		x_split	= 8;
 	private	Bitmap	image_buffer;
 	private Bitmap	show_buffer;
 	private	Canvas	i_canvas;
@@ -50,6 +60,11 @@ public class GearInfo extends View implements Runnable{
 	private long	anim_millis0;
 	private AccelerateDecelerateInterpolator anim_interpolator;
 	private Thread 	anim_thread = null;
+	
+	//Handler and Runnable
+	private Handler 	m_tick_handler = null;
+	private Runnable 	m_tick_runnable = null;
+	private int			m_delay_cnt = 0;
 	
 	public GearInfo(Context context) {
 		super(context);
@@ -74,15 +89,107 @@ public class GearInfo extends View implements Runnable{
 		anim_y_total_delta = 0;
 		anim_duration = DEFAULT_ANIMATION_DURATION;
 		current_gear = GAER_ENUMS.GEAR_N;
-		text_size = DEFAULT_TEXT_SIZE;
+		if (GlobalParams.RUN_720P)
+			text_size = 140;
+		else
+			text_size = 80;
 		number_color = DEFAULT_NUMBER_COLOR;
-		unit_color = DEFAULT_UNIT_COLOR;
+//		unit_color = DEFAULT_UNIT_COLOR;
 		
 		buffer_rect = new Rect();
 		show_rect = new Rect();
 		anim_interpolator = new AccelerateDecelerateInterpolator();
+//		m_gear_unit = getResources().getString(R.string.obd_gear_unit);
 
-		renderImageBuffer();		
+		renderImageBuffer();
+		
+		m_tick_handler = new Handler();	
+		m_tick_runnable = new Runnable() {
+			@Override
+			public void run() {
+				switch (m_state) {
+				case S_IDLE:
+					if (m_started) {
+						m_state = S_STARTUP;
+						m_tick_handler.postDelayed(this, 100);
+					}
+					break;
+				case S_STARTUP:
+					if (m_delay_cnt < 4) {
+						switch (m_delay_cnt) {
+						case 0:
+							animateSwitchGear(GAER_ENUMS.GEAR_1);
+							m_tick_handler.postDelayed(this, 2000);
+							break;
+						case 1:
+							animateSwitchGear(GAER_ENUMS.GEAR_2);
+							m_tick_handler.postDelayed(this, 4000);
+							break;
+						case 2:
+							animateSwitchGear(GAER_ENUMS.GEAR_3);
+							m_tick_handler.postDelayed(this, 4000);
+							break;
+						case 3:
+							animateSwitchGear(GAER_ENUMS.GEAR_4);
+							m_tick_handler.postDelayed(this, 4000);
+							break;
+						default:
+							Log.e(TAG, "Can not get here!");
+							break;
+						}
+						
+						m_delay_cnt++;
+					} else {
+						m_delay_cnt = 0;
+						m_state = S_RUNNING;
+						m_tick_handler.postDelayed(this, 4000); // loop it
+					}
+					break;
+				case S_RUNNING:
+					if (!m_started) {
+						m_state = S_SLOWDOWN;
+						m_tick_handler.postDelayed(this, 100);
+					} else {
+						int g = 2 + (int)(Math.random() * 3.0f);
+						switch (g) {
+						case 2: animateSwitchGear(GAER_ENUMS.GEAR_2); break;
+						case 3: animateSwitchGear(GAER_ENUMS.GEAR_3); break;
+						case 4: animateSwitchGear(GAER_ENUMS.GEAR_4); break;
+						case 5: animateSwitchGear(GAER_ENUMS.GEAR_5); break;
+						}
+						
+						int d;
+						if (g == 2)
+							d = 8;
+						else
+							d = (int)(30 * Math.random());
+						m_tick_handler.postDelayed(this, d * 1000); // loop it
+					}
+					break;
+				case S_SLOWDOWN:
+					if (m_delay_cnt < 4) {
+						++m_delay_cnt;
+						m_tick_handler.postDelayed(this, 1000);
+					} else {
+						animateSwitchGear(GAER_ENUMS.GEAR_N);
+						m_state = S_IDLE;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		};
+	}
+	
+	private boolean m_started = false;
+	public void start() {
+		m_started = true;
+		m_tick_handler.postDelayed(m_tick_runnable, 100); // trick the runnable after 1 second
+	}
+	
+	public void stop() {
+		m_started = false;
 	}
 	
 	/**
@@ -91,12 +198,12 @@ public class GearInfo extends View implements Runnable{
      * @param p text paint
      * @return baseline of text to be drawn within H
      */
-	private int getCenterAlignBaseline(int H, Paint p) {
-		int text_ascent = -(int) p.ascent();
-		int text_descent = (int) p.descent();
-		
-		return (H + text_ascent - text_descent) / 2;
-	}
+//	private int getCenterAlignBaseline(int H, Paint p) {
+//		int text_ascent = -(int) p.ascent();
+//		int text_descent = (int) p.descent();
+//		
+//		return (H + text_ascent - text_descent) / 2;
+//	}
 	
 	/**
 	 * Render image buffer and show buffer, 
@@ -127,7 +234,7 @@ public class GearInfo extends View implements Runnable{
 		
 		int x = 0;
 		int y = 0;
-		int base_line = getCenterAlignBaseline(margined_h, text_paint);
+		int base_line = text_ascent;//getCenterAlignBaseline(margined_h, text_paint);
 		
 		/* FIXME: fille with blck color make this view not transparent. */
 		tmp_canvas.drawColor(Color.BLACK);
@@ -140,16 +247,20 @@ public class GearInfo extends View implements Runnable{
 			tmp_canvas.drawText(cur_gear, x, y, text_paint);			
 		}
 		
+//		// render show buffer
+//		int tmp_w = (int) text_paint.measureText(m_gear_unit);
+//		show_rect.set(0, 0, text_w, margined_h);
+//		show_buffer = Bitmap.createBitmap(text_w + x_split + tmp_w, margined_h, Config.ARGB_8888);
+//		text_paint.setColor(unit_color);
+//		i_canvas = new Canvas(show_buffer);
+//		i_canvas.drawText(m_gear_unit, 
+//							show_buffer.getWidth() - tmp_w, 
+//							base_line, 
+//							text_paint);
 		// render show buffer
-		int tmp_w = (int) text_paint.measureText(GEAR_UNIT_STRING);
 		show_rect.set(0, 0, text_w, margined_h);
-		show_buffer = Bitmap.createBitmap(text_w + x_split + tmp_w, margined_h, Config.ARGB_8888);
-		text_paint.setColor(unit_color);
+		show_buffer = Bitmap.createBitmap(text_w, margined_h, Config.ARGB_8888);
 		i_canvas = new Canvas(show_buffer);
-		i_canvas.drawText(GEAR_UNIT_STRING, 
-							show_buffer.getWidth() - tmp_w, 
-							base_line, 
-							text_paint);
 		
 		// resize and refresh the interface
 		requestLayout(); 	//invoke onMeasure

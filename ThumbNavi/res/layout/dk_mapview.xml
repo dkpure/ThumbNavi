@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- when 854X480, width = 240sp, height = 180sp -->
+<!-- when 1280X720, width = 800sp, height = 360sp -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="240dp" 
-    android:layout_height="180dp" >
+    android:layout_width="800sp" 
+    android:layout_height="360sp" >
 
     <com.baidu.mapapi.map.MapView
         android:id="@+id/bmapView"

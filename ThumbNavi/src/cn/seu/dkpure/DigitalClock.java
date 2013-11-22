@@ -18,8 +18,8 @@ public class DigitalClock extends View {
 	final static String Weekdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 	final static int SPLITX = 5;
 	
-	private	Paint	time_paint;
-	private	Paint	week_paint;
+	private	Paint	time_paint = null;
+	private	Paint	week_paint = null;
 	private	String	str_time = "15:32";//null;
 	private	String	str_weekday = "Mon";//null;
 	private	String	str_am = "PM";//null;
@@ -70,7 +70,10 @@ public class DigitalClock extends View {
 	 */
 	private void initDigitalClock() {
 		updateTime();
-		i_text_size = 70;
+		if (GlobalParams.RUN_720P)
+			i_text_size = 140;
+		else
+			i_text_size = 70;
 		time_paint = new Paint();
 		time_paint.setAntiAlias(true);
 		time_paint.setColor(Color.WHITE);
