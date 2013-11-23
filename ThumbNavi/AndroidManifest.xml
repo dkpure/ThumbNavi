@@ -33,10 +33,8 @@
             android:screenOrientation="landscape" 
             android:configChanges="orientation|keyboardHidden" > 
             <!-- disable activity restart when landscape changed -->
-            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -44,6 +42,13 @@
         <activity
             android:name=".ThumbNaviDriving" 
             android:label="@string/activity_driving" 
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden" >
+		</activity>
+		
+        <activity
+            android:name=".ThumbNaviPathSearch" 
+            android:label="@string/activity_pathsearch" 
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden" >
 		</activity>

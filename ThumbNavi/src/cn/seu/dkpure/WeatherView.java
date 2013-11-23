@@ -58,18 +58,18 @@ public class WeatherView extends View {
          * Do some initialization work.
          */
         private void initWeatherView () {
-                temp_str = "N/A";
-                text_paint = new Paint();
-                text_paint.setColor(Color.WHITE);
-                text_paint.setAntiAlias(true);
-                if (GlobalParams.RUN_720P)
-                	text_paint.setTextSize(60);
-                else
-                	text_paint.setTextSize(40);
-                
-                //retrieve weather information from weather_request_url
-                winfo_getter = new WeatherInfoGetter();
-        winfo_getter.execute(getResources().getString(R.string.fine_weather_request_url));
+            temp_str = "N/A";
+            text_paint = new Paint();
+            text_paint.setColor(Color.WHITE);
+            text_paint.setAntiAlias(true);
+            if (GlobalParams.RUN_720P)
+            	text_paint.setTextSize(70);
+            else
+            	text_paint.setTextSize(40);
+            
+            //retrieve weather information from weather_request_url
+            winfo_getter = new WeatherInfoGetter();
+            winfo_getter.execute(getResources().getString(R.string.fine_weather_request_url));
         }
         
         /**
@@ -79,7 +79,7 @@ public class WeatherView extends View {
          */
         public void updateView(int resId, String temp) {
                 if (temp == null)
-                        return;
+                	return;
                 
                 weather_icon = BitmapFactory.decodeResource(getResources(), resId);
                 temp_str = temp;

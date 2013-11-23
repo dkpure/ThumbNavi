@@ -80,7 +80,8 @@ public class DkMapWidget extends FrameLayout {
         
         // initialize mapView and mapController
         mMapView = (MapView)findViewById(R.id.bmapView);
-        mMapView.getController().setCenter(cur_location_point);
+        mMapView.displayZoomControls(true);
+//        mMapView.getController().setCenter(cur_location_point);
         
 //		if (GlobalParams.RUN_720P) {
 //			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(500, 360);
@@ -90,8 +91,10 @@ public class DkMapWidget extends FrameLayout {
 //		}
         
         mMapController = mMapView.getController();
+        mMapController.setCenter(cur_location_point);
         mMapController.enableClick(true);
         mMapController.setZoom(16);
+        mMapController.setOverlooking(30);
         
         // setup locationListener and start locationClient
         mLocClient = new LocationClient(context);

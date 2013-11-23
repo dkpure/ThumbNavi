@@ -55,8 +55,13 @@ public class ThmbNaiviMain extends Activity {
 		dashboardSignsAnimShow();
     }
     
-    private void startDrivingActivity() {
-    	Intent intent = new Intent(this, ThumbNaviDriving.class);
+//    private void startDrivingActivity() {
+//    	Intent intent = new Intent(this, ThumbNaviDriving.class);
+//		startActivity(intent);
+//    }
+    
+    private void startPathSearchActivity() {
+    	Intent intent = new Intent(this, ThumbNaviPathSearch.class);
 		startActivity(intent);
     }
     
@@ -74,7 +79,8 @@ public class ThmbNaiviMain extends Activity {
 					@Override
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
-						startDrivingActivity();
+//						startDrivingActivity();
+						startPathSearchActivity();
 					}
 					
 				}

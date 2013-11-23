@@ -38,6 +38,10 @@ public class ThumbNaviDriving extends Activity {
 	private ArrivalHintBar  	wg_arrivalhintbar = null;
 	
 	private MKSearch 			mSearch = null;
+	private String				m_start_city = "";
+	private String				m_start_location = "";
+	private	String				m_stop_city = "";
+	private String				m_stop_location = "";
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,16 @@ public class ThumbNaviDriving extends Activity {
         if (app.mBMapManager == null) {
             app.mBMapManager = new BMapManager(this);
             app.mBMapManager.init(MainApplication.strKey, new MainApplication.MyGeneralListener());
+        }
+        
+        Bundle extra_msg = this.getIntent().getExtras();
+        if (!extra_msg.isEmpty()) {
+        	m_start_city = extra_msg.getString(GlobalParams.PATH_SEARCH_BUNDLE_KEY_STARTCITY);
+        	m_start_location = extra_msg.getString(GlobalParams.PATH_SEARCH_BUNDLE_KEY_STARTLOCATION);
+        	m_stop_city = extra_msg.getString(GlobalParams.PATH_SEARCH_BUNDLE_KEY_STOPCITY);
+        	m_stop_location = extra_msg.getString(GlobalParams.PATH_SEARCH_BUNDLE_KEY_STOPLOCATION);
+        	DkDebuger.v(TAG, "start city: " + m_start_city + ", start location: " + m_start_location);
+        	DkDebuger.v(TAG, "stop city: " + m_stop_city + ", stop location: " + m_stop_location);
         }
         
         emergeViews();
@@ -122,16 +136,19 @@ public class ThumbNaviDriving extends Activity {
 	private void doSearch() {
 		// 对起点终点的name进行赋值，也可以直接对坐标赋值，赋值坐标则将根据坐标进行搜索
 		MKPlanNode stNode = new MKPlanNode();
-		stNode.name = "总统府";//"东南大学";//
 		MKPlanNode enNode = new MKPlanNode();
-		//"大行宫";//"安德门";//"河定桥";//"珍珠泉";
-		//"莫愁湖";//"淳化";//"鼓楼区";//"夫子庙";
-		//"草场门";
-		enNode.name = "栖霞山";
 		
-		// 实际使用中请对起点终点城市进行正确的设定
+		stNode.name = (m_start_location != "") ? m_start_location: "总统府";
+		enNode.name = (m_stop_location != "") ? m_stop_location: "栖霞山";
+		//"大行宫";//"安德门";//"河定桥";//"珍珠泉";
+		//"莫愁湖";//"淳化";//"鼓楼区";//"夫子庙";//"草场门";
+		
 		mSearch.setDrivingPolicy(MKSearch.ECAR_TIME_FIRST);//MKSearch.ECAR_DIS_FIRST
-		mSearch.drivingSearch(CITY, stNode, CITY, enNode);
+		
+		if (m_start_city != "" && m_stop_city != "")
+			mSearch.drivingSearch(m_start_city, stNode, m_stop_city, enNode);
+		else
+			mSearch.drivingSearch(CITY, stNode, CITY, enNode);
 	}
 	
 	private void emergeViews() {
@@ -215,9 +232,6 @@ public class ThumbNaviDriving extends Activity {
 		}
 		
 		void stop() {
-//			wg_speedinfo.stop();
-//			wg_rpminfo.stop();
-//			wg_gearinfo.stop();
 			wg_singlenodebar.arrival();
 			wg_arrivalhintbar.stop();
 		}
@@ -231,16 +245,12 @@ public class ThumbNaviDriving extends Activity {
 	
 	@Override
     protected void onPause() {
-//    	if (wg_dkmap != null)
-//    		wg_dkmap.onPause();
 		wg_routenavi.stopAutoNavi();
         super.onPause();
     }
     
     @Override
     protected void onResume() {
-//    	if (wg_dkmap != null)
-//    		wg_dkmap.onResume();
         super.onResume();
     }
     
@@ -252,14 +262,10 @@ public class ThumbNaviDriving extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
-//    	if (wg_dkmap != null)
-//    		wg_dkmap.onSaveInstanceState(outState);
     }
     
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
     	super.onRestoreInstanceState(savedInstanceState);
-//    	if (wg_dkmap != null)
-//    		wg_dkmap.onRestoreInstanceState(savedInstanceState);
     }
 }

@@ -31,7 +31,7 @@ public class SingleNodeBar extends LinearLayout {
 		
 		// Parse and Instantiate SingleNodeBar
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		inflater.inflate(R.layout.dk_single_node, this);
+		inflater.inflate(R.layout.dk_singlenode_bar, this);
 		
 		init();
 	}
