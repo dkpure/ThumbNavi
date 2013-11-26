@@ -20,6 +20,7 @@
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
 	<uses-permission android:name="android.permission.ACCES_MOCK_LOCATION"></uses-permission>
 	<uses-permission android:name="android.permission.ACCESS_GPS" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 	
     <application
         android:name=".MainApplication"
@@ -52,6 +53,15 @@
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden" >
 		</activity>
+		
+        <activity
+            android:name=".ThumbNaviNotification" 
+            android:label="@string/activity_notification"
+            android:theme="@style/Transparent"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden" >
+		</activity>
+        
         
         <service android:name="com.baidu.location.f" android:enabled="true"
 			android:process=":remote">

@@ -4,6 +4,13 @@
     android:layout_height="match_parent"
     android:background="#000000" >
 
+    <cn.seu.dkpure.DkNotification
+        android:id="@+id/driving_Notification"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentTop="true"
+	    android:layout_alignParentRight="true" />
+    
 	<cn.seu.dkpure.ArrivalHintBar
 	    android:id="@+id/driving_ArrivalHintBar"
 	    android:layout_width="wrap_content"

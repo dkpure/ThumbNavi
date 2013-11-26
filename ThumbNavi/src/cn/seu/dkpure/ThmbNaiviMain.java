@@ -79,8 +79,8 @@ public class ThmbNaiviMain extends Activity {
 					@Override
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
-//						startDrivingActivity();
 						startPathSearchActivity();
+//						startNotificationActivity();
 					}
 					
 				}
@@ -97,7 +97,10 @@ public class ThmbNaiviMain extends Activity {
     	if (wg_sign_seatbelt != null) {
     		if (GlobalParams.RUN_720P)
     			wg_sign_seatbelt.setImageBitmap(
-    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_seat_belt_166x156));
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_seat_belt_720p));
+    		else
+    			wg_sign_seatbelt.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_seat_belt));
     			
     		wg_sign_seatbelt.setVisibility(View.INVISIBLE);
     	}
@@ -105,21 +108,33 @@ public class ThmbNaiviMain extends Activity {
     	if (wg_sign_fontlight != null) {
     		if (GlobalParams.RUN_720P)
     			wg_sign_fontlight.setImageBitmap(
-    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_high_light_beam_166x156));
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_high_light_beam_720p));
+    		else
+    			wg_sign_fontlight.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_high_light_beam));
+    		
     		wg_sign_fontlight.setVisibility(View.INVISIBLE);
     	}
     	
     	if (wg_sign_turnleft != null) {
     		if (GlobalParams.RUN_720P)
     			wg_sign_turnleft.setImageBitmap(
-    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_turn_left_166x156));
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_turn_left_720p));
+    		else
+    			wg_sign_turnleft.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_turn_left));
+    		
     		wg_sign_turnleft.setVisibility(View.INVISIBLE);
     	}
     	
     	if (wg_sign_gas != null) {
     		if (GlobalParams.RUN_720P)
     			wg_sign_gas.setImageBitmap(
-    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_gas_166x156));
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_gas_720p));
+    		else
+    			wg_sign_gas.setImageBitmap(
+    					BitmapFactory.decodeResource(getResources(), R.drawable.sign_gas));
+    		
     		wg_sign_gas.setVisibility(View.INVISIBLE);
     	}
     }

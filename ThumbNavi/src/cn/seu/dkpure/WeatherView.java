@@ -191,21 +191,21 @@ public class WeatherView extends View {
         		R.drawable.weather_icon15, R.drawable.weather_icon99, R.drawable.weather_icon17
     	};
         
-        private final int icon_256x256_tab[] =
+        private final int icon_720p_tab[] =
         	{
-            		R.drawable.weather_icon0_256x256, R.drawable.weather_icon1_256x256, R.drawable.weather_icon2_256x256,
-            		R.drawable.weather_icon3_256x256, R.drawable.weather_icon4_256x256, R.drawable.weather_icon99_256x256,
-            		R.drawable.weather_icon6_256x256, R.drawable.weather_icon7_256x256, R.drawable.weather_icon8_256x256,
-            		R.drawable.weather_icon9_256x256, R.drawable.weather_icon99_256x256, R.drawable.weather_icon99_256x256,
-            		R.drawable.weather_icon12_256x256, R.drawable.weather_icon13_256x256, R.drawable.weather_icon14_256x256,
-            		R.drawable.weather_icon15_256x256, R.drawable.weather_icon99_256x256, R.drawable.weather_icon17_256x256
+            		R.drawable.weather_icon0_720p, R.drawable.weather_icon1_720p, R.drawable.weather_icon2_720p,
+            		R.drawable.weather_icon3_720p, R.drawable.weather_icon4_720p, R.drawable.weather_icon99_720p,
+            		R.drawable.weather_icon6_720p, R.drawable.weather_icon7_720p, R.drawable.weather_icon8_720p,
+            		R.drawable.weather_icon9_720p, R.drawable.weather_icon99_720p, R.drawable.weather_icon99_720p,
+            		R.drawable.weather_icon12_720p, R.drawable.weather_icon13_720p, R.drawable.weather_icon14_720p,
+            		R.drawable.weather_icon15_720p, R.drawable.weather_icon99_720p, R.drawable.weather_icon17_720p
         	};
         
         int getIconId(int index) {
         	if (!GlobalParams.RUN_720P)
         		return index < icon_128x128_tab.length ? icon_128x128_tab[index] : R.drawable.weather_icon99;
         	else
-        		return index < icon_256x256_tab.length ? icon_256x256_tab[index] : R.drawable.weather_icon99_256x256;
+        		return index < icon_720p_tab.length ? icon_720p_tab[index] : R.drawable.weather_icon99_720p;
         }
         
         /**

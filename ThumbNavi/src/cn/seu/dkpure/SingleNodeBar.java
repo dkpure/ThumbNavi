@@ -95,7 +95,7 @@ public class SingleNodeBar extends LinearLayout {
 	}
 	
 	private final int 
-	drawable_256x256_id_tab[] = 
+	drawable_id_tab[] = 
 	{
 		R.drawable.dir_go_straight, R.drawable.dir_turn_left0, 
 		R.drawable.dir_turn_left1, 	R.drawable.dir_turn_left2,
@@ -103,12 +103,12 @@ public class SingleNodeBar extends LinearLayout {
 		R.drawable.dir_turn_right1, R.drawable.dir_turn_right2
 	 };
 	private final int 
-	drawable_98x98_id_tab[] = 
+	drawable_720p_id_tab[] = 
 	{
-		R.drawable.dir_go_straight_98x98, 	R.drawable.dir_turn_left0_98x98,
-		R.drawable.dir_turn_left1_98x98, 	R.drawable.dir_turn_left2_98x98,
-		R.drawable.dir_turn_back_98x98, 	R.drawable.dir_turn_right0_98x98, 
-		R.drawable.dir_turn_right1_98x98, 	R.drawable.dir_turn_right2_98x98
+		R.drawable.dir_go_straight_720p, 	R.drawable.dir_turn_left0_720p,
+		R.drawable.dir_turn_left1_720p, 	R.drawable.dir_turn_left2_720p,
+		R.drawable.dir_turn_back_720p, 	R.drawable.dir_turn_right0_720p, 
+		R.drawable.dir_turn_right1_720p, 	R.drawable.dir_turn_right2_720p
 	 };
 	
 	/**
@@ -119,11 +119,11 @@ public class SingleNodeBar extends LinearLayout {
 	private Bitmap getBitmapFromIndex(int direction_index) {
 		int resId = R.drawable.dir_unknown;
 		
-		if (direction_index < drawable_256x256_id_tab.length) {
+		if (direction_index < drawable_720p_id_tab.length) {
 			if (GlobalParams.RUN_720P)
-				resId = drawable_256x256_id_tab[direction_index];
+				resId = drawable_720p_id_tab[direction_index];
 			else
-				resId = drawable_98x98_id_tab[direction_index];
+				resId = drawable_id_tab[direction_index];
 		}
 		
 		return BitmapFactory.decodeResource(getResources(), resId);

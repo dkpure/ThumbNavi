@@ -36,6 +36,7 @@ public class ThumbNaviDriving extends Activity {
 	private RpmInfo				wg_rpminfo = null;
 	private	SpeedInfo			wg_speedinfo = null;
 	private ArrivalHintBar  	wg_arrivalhintbar = null;
+	private DkNotification		wg_dknotification = null;
 	
 	private MKSearch 			mSearch = null;
 	private String				m_start_city = "";
@@ -158,7 +159,12 @@ public class ThumbNaviDriving extends Activity {
     	wg_speedinfo = (SpeedInfo) findViewById(R.id.driving_SpeedInfo);
 		wg_routenavi = (RouteNaviWidget) findViewById(R.id.driving_RouteNaviWidget);
 		wg_arrivalhintbar = (ArrivalHintBar) findViewById(R.id.driving_ArrivalHintBar);
+		wg_dknotification = (DkNotification) findViewById(R.id.driving_Notification);
     	
+		if (wg_dknotification != null) {
+			wg_dknotification.bringToFront();
+		}
+		
 		if (wg_arrivalhintbar != null) {
 			wg_arrivalhintbar.setVisibility(View.INVISIBLE);
 			wg_arrivalhintbar.bringToFront();
@@ -213,7 +219,7 @@ public class ThumbNaviDriving extends Activity {
     	}
     	
     	if (wg_gearinfo != null) {
-    		wg_gearinfo.bringToFront();
+//    		wg_gearinfo.bringToFront();
     		wg_gearinfo.setGear(GearInfo.GAER_ENUMS.GEAR_N);
     	}
 	    

@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -22,11 +23,11 @@ public class GearInfo extends View implements Runnable{
 	public enum GAER_ENUMS {GEAR_N, GEAR_1, GEAR_2, GEAR_3, GEAR_4, GEAR_5, GEAR_R};
 //	final static String m_gear_unit = "µµ";
 	private final String TAG = "GearInfo";
-	final static String	GEAR_ENUM_STRING = "¿Õ12345R";
+	final static String	GEAR_ENUM_STRING = "N12345R";
 	final static int	MIN_REFRESH_DURATION = 30; // refresh rate: 1000/30=33fps
 	final static int	DEFAULT_ANIMATION_DURATION = 800; //in ms
 	final static int	DEFAULT_TEXT_SIZE = 140;//60;//40;
-	final static int	DEFAULT_NUMBER_COLOR = Color.rgb(177, 241, 24);
+	final static int	DEFAULT_NUMBER_COLOR = Color.rgb(248, 207, 15);// Color.rgb(177, 241, 24);
 	final static int	DEFAULT_UNIT_COLOR = Color.WHITE;
 	
 	//private states
@@ -219,6 +220,7 @@ public class GearInfo extends View implements Runnable{
 		text_paint.setAntiAlias(true);
 		text_paint.setTextSize(text_size);
 		text_paint.setColor(number_color);
+		text_paint.setTypeface(Typeface.DEFAULT_BOLD);
 		
 		int text_ascent = - (int)text_paint.ascent();
 		int text_h = text_ascent + (int) text_paint.descent();

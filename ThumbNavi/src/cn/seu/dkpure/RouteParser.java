@@ -186,4 +186,14 @@ public class RouteParser {
 		
 		return ret;
 	}
+	
+	static String getRouteIndicationForTts(String cline) {
+		String ret = "";
+		
+		if (cline != null && !cline.equals(""))
+//			ret = cline.replace('-', ' ').trim();
+			ret = cline.trim().replace("-", "").replace(" ", "");
+		
+		return ret;
+	}
 }

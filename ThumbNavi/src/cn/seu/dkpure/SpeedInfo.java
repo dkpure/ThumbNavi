@@ -15,7 +15,7 @@ import android.view.View;
  */
 public class SpeedInfo extends View {
 //	final static int	DEFAULT_TEXT_SIZE = 120;//40;
-	final static int	DEFAULT_NUMBER_COLOR = Color.rgb(177, 241, 24);
+	final static int	DEFAULT_NUMBER_COLOR = Color.rgb(248, 207, 15);//Color.rgb(177, 241, 24);
 	final static int	DEFAULT_UNIT_COLOR = Color.WHITE;
 	
 	//private states

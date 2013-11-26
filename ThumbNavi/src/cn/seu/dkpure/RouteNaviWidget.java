@@ -84,17 +84,19 @@ public class RouteNaviWidget extends View {
 	//
 	private NaviAnalyzer m_navi_annlyzer;
 	
+	private DkSpeaker m_dkspeaker = null;
+	
 	public RouteNaviWidget(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
 		
-		init();
+		init(context);
 	}
 	
 	public RouteNaviWidget(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
-		init();
+		init(context);
 	}
 	
 	public interface UpdateNaviInfoListener {
@@ -150,7 +152,14 @@ public class RouteNaviWidget extends View {
 		return Math.toDegrees(radian);
 	}
 	
-	private void init() {
+	private void speakOut(String txt) {
+		if (null != m_dkspeaker) {
+			m_dkspeaker.SpeakTextOut(txt);
+		}
+	}
+	
+	private void init(Context c) {
+		m_dkspeaker = new DkSpeaker(c);
 		m_line_paint = new Paint();
 		m_line_paint.setColor(Color.argb(200, 58, 163, 244));
 		m_line_paint.setAntiAlias(true);
@@ -226,12 +235,53 @@ public class RouteNaviWidget extends View {
 			    
 				if (m_current_step < 1.000001d && !m_stop_flag)
 					m_tick_handler.postDelayed(this, 100); // loop it
-//				else {
-//					Log.v(TAG, "m_current_step = " + m_current_step);
-//				}
 			}
 		};
 	}
+	
+//	@Override
+//	public void run() {
+//		// TODO Auto-generated method stub
+//		while (!m_stop_flag) {
+//			if (m_route_ok) {
+//			    float cur_pos[] = {0f, 0f};
+//			    float next_pos[] = {0f, 0f};
+//			    double next_step = m_current_step + 2 * m_path_step;
+//			    
+//			    m_path_measure.getPosTan(m_path_measure.getLength() * (float)m_current_step, cur_pos, null);
+//			    //calculate the rotate angle of indicator
+//				if (next_step < 1.00001f) {
+//					m_path_measure.getPosTan(m_path_measure.getLength() * (float)next_step, next_pos, null);
+//					int tmp_angle = (int) clacAngle(next_pos[0] - cur_pos[0], 
+//													cur_pos[1] - next_pos[1]);
+//					if (Math.abs(tmp_angle - m_angle) > 2) {
+//						m_angle = tmp_angle;
+//					}
+//				}
+//				
+//				if (m_locate_cnt++ > 4) {
+//					refreshLocation(cur_pos[0], cur_pos[1]);
+//					m_locate_cnt = 0;
+//				}
+//			
+//			    m_current_step += m_path_step;
+//			    m_offset_x = -(int)cur_pos[0];
+//			    m_offset_y = -(int)cur_pos[1];
+//			    DkDebuger.v(TAG, "x: " + m_offset_x + ", y:" + m_offset_y);
+//			    postInvalidate();
+//			}
+//		    
+//			if (m_current_step < 1.000001d) {
+//				try {
+//					Thread.sleep(100);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			} else
+//				m_stop_flag = true;
+//		}
+//	}
 	
 	private void refreshLocation(float px, float py) {
     	Point2Geo(px, py, m_cur_geopt);
@@ -246,6 +296,14 @@ public class RouteNaviWidget extends View {
 	
 	public void startNavigation(int speed_level) {
 		if (m_route_ok) {
+			speakOut("开始导航");
+			m_navi_annlyzer.speakOutFirIndication();
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			setAutoNaviSpeedLevel(speed_level);
 			m_navi_annlyzer.initBeforeNavigation();
 			m_tick_handler.postDelayed(m_tick_runnable, 100); // trick the runnable
@@ -354,6 +412,13 @@ public class RouteNaviWidget extends View {
 	public void setRoute(MKRoute route) {
 		if (route == null) return;
 		
+		speakOut("路径规划成功");
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		m_road_len = route.getDistance();
 		Log.v(TAG, "Total distance: " + route.getDistance());
 
@@ -480,7 +545,7 @@ public class RouteNaviWidget extends View {
 
         if (!drawing.compareAndSet(false, true))
         	return;
-
+        
 //		canvas.setDrawFilter(mPfd);
         canvas.translate(m_window_width_div2, m_window_height_div2);
         m_driving_path.offset(m_offset_x, m_offset_y);
@@ -575,6 +640,7 @@ public class RouteNaviWidget extends View {
 			Log.v(TAG, "m_distance_tolerence = " + m_distance_tolerence);
 		}
 		
+		private boolean m_has_speaked = false;
 		private int m_distance_tolerence = 40;
 		private int last_distance = 0;
 		private boolean need_prediction = false;
@@ -588,10 +654,17 @@ public class RouteNaviWidget extends View {
 //					Log.v(TAG, "step_len: " + m_step_lengths[step_len_idx] + ", driving_len: " + m_driving_step_length);
 					if (m_step_lengths[step_len_idx] - m_driving_step_length < 120) {
 						m_begin_switch = false;
-						if (step_len_idx == m_step_lengths.length - 1)
+						if (step_len_idx == m_step_lengths.length - 1) {
+							speakOut("到达终点");
 							raiseNaviEvent(PRE_ARRIVE, "");
-						else
-							raiseNaviEvent(PRE_SWITCH_NODE, m_route.getStep(m_switching_node_idx).getContent());
+						} else {
+							String content = m_route.getStep(m_switching_node_idx).getContent();
+							if (!m_has_speaked) {
+								speakOut(RouteParser.getRouteIndicationForTts(content));
+								m_has_speaked = true;
+							}
+							raiseNaviEvent(PRE_SWITCH_NODE, content);
+						}
 					}
 				}
 			}
@@ -620,7 +693,18 @@ public class RouteNaviWidget extends View {
 			else
 				need_prediction = false;
 			
-			raiseNaviEvent(SWITCH_NODE, m_route.getStep(m_switching_node_idx-1).getContent());
+			String content = m_route.getStep(m_switching_node_idx-1).getContent();
+			if (m_has_speaked) {
+				m_has_speaked = false;
+			} else {
+				if (m_switching_node_idx > 1)
+					speakOut(RouteParser.getRouteIndicationForTts(content));
+			}
+			raiseNaviEvent(SWITCH_NODE, content);
+		}
+		
+		void speakOutFirIndication() {
+			speakOut(RouteParser.getRouteIndicationForTts(m_route.getStep(0).getContent()));
 		}
 		
 		/**

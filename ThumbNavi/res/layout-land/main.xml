@@ -19,7 +19,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:layout_marginRight="15dp"
-                android:src="@drawable/sign_seat_belt" />
+                android:src="@drawable/sign_seat_belt_720p" />
 
             <ImageView
                 android:id="@+id/imgV_sign_frontlight"

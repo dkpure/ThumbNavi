@@ -66,6 +66,7 @@ public class DkMapWidget extends FrameLayout {
 	 * 3. initialize myLocationOverlay and add to mMapView
 	 * @param context
 	 */
+//	@SuppressWarnings("deprecation")
 	private void init(Context context) {
 		mcontext = context;// record the context for later usage
 		
@@ -80,7 +81,8 @@ public class DkMapWidget extends FrameLayout {
         
         // initialize mapView and mapController
         mMapView = (MapView)findViewById(R.id.bmapView);
-        mMapView.displayZoomControls(true);
+        mMapView.setTraffic(true);
+//        mMapView.displayZoomControls(true);
 //        mMapView.getController().setCenter(cur_location_point);
         
 //		if (GlobalParams.RUN_720P) {
@@ -93,7 +95,7 @@ public class DkMapWidget extends FrameLayout {
         mMapController = mMapView.getController();
         mMapController.setCenter(cur_location_point);
         mMapController.enableClick(true);
-        mMapController.setZoom(16);
+        mMapController.setZoom(15);//16
         mMapController.setOverlooking(30);
         
         // setup locationListener and start locationClient
